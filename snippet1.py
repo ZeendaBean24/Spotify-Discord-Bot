@@ -31,3 +31,14 @@ for playlist in user_playlists['items']:
     print("---")
 
 
+def get_playlist_genres(playlist_id):
+    tracks = sp.playlist_tracks(playlist_id)
+    genres = set()
+
+    for track in tracks['items']:
+        for artist in track['track']['artists']:
+            artist_info = sp.artist(artist['id'])
+            for genre in artist_info['genres']:
+                genres.add(genre)
+
+    return list(genres)
