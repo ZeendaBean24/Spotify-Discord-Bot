@@ -17,3 +17,17 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id,
                                                redirect_uri=redirect_uri,
                                                scope='playlist-read-private'))
 
+
+# Retrieve the current user's playlists
+user_playlists = sp.current_user_playlists()
+
+# Iterate through the playlists and print out their details
+for playlist in user_playlists['items']:
+    print(f"Playlist Name: {playlist['name']}")
+    print(f"Playlist ID: {playlist['id']}")
+    print(f"Owner: {playlist['owner']['display_name']}")
+    print(f"Total Tracks: {playlist['tracks']['total']}")
+    print(f"Description: {playlist['description']}")
+    print("---")
+
+
