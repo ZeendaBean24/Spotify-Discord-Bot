@@ -17,18 +17,21 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id,
                                                redirect_uri=redirect_uri,
                                                scope='playlist-read-private'))
 
+# Retrieve the current user's Spotify ID
+user_id = sp.current_user()["id"]
 
 # Retrieve the current user's playlists
 user_playlists = sp.current_user_playlists()
 
-# Iterate through the playlists and print out their details
+# Iterate through the playlists and print out details of user's own playlists
 for playlist in user_playlists['items']:
-    print(f"Playlist Name: {playlist['name']}")
-    print(f"Playlist ID: {playlist['id']}")
-    print(f"Owner: {playlist['owner']['display_name']}")
-    print(f"Total Tracks: {playlist['tracks']['total']}")
-    print(f"Description: {playlist['description']}")
-    print("---")
+    if playlist['owner']['id'] == user_id:  # Check if the playlist is owned by the user
+        print(f"Playlist Name: {playlist['name']}")
+        print(f"Playlist ID: {playlist['id']}")
+        print(f"Owner: {playlist['owner']['display_name']}")
+        print(f"Total Tracks: {playlist['tracks']['total']}")
+        print(f"Description: {playlist['description']}")
+        print("---")
 
 
 def get_playlist_genres(playlist_id):
