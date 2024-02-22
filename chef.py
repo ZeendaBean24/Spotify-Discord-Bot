@@ -38,7 +38,21 @@ async def info(ctx):
 
 @bot.command()
 async def test(ctx):
-    await ctx.send("```hi```")
+    embed = discord.Embed(
+        title = 'Title',
+        description = 'This is description.', 
+        colour = discord.Colour.blue()
+    )
+
+    embed.set_footer(text='This is a footer')
+    embed.set_image(url='https://archive.org/download/discordprofilepictures//discordblue.png')
+    embed.set_thumbnail(url='https://archive.org/download/discordprofilepictures//discordblue.png')
+    embed.set_author(name='Zeen Liu', icon_url='https://archive.org/download/discordprofilepictures//discordblue.png')
+    embed.add_field(name='Field Name', value='Field Value', inline=False)
+    embed.add_field(name='Field Name', value='Field Value', inline=True)
+    embed.add_field(name='Field Name', value='Field Value', inline=True)
+    
+    await ctx.send(embed=embed)
 
 load_dotenv()
 bot.run(os.getenv("DISCORD_TOKEN"))
