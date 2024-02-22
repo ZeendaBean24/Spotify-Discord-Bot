@@ -36,6 +36,9 @@ async def cmds(ctx):
 async def info(ctx):
     await ctx.send('This bot is created by @zeendabean24. It offers fun and utility commands.')
 
+@bot.command()
+async def test(ctx):
+    await ctx.send("```hi```")
 
 load_dotenv()
 bot.run(os.getenv("DISCORD_TOKEN"))
