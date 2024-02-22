@@ -38,6 +38,7 @@ async def info(ctx):
 
 @bot.command()
 async def test(ctx):
+    channel = ctx.message.channel
     embed = discord.Embed(
         title = 'Title',
         description = 'This is description.', 
@@ -52,7 +53,7 @@ async def test(ctx):
     embed.add_field(name='Field Name', value='Field Value', inline=True)
     embed.add_field(name='Field Name', value='Field Value', inline=True)
     
-    await ctx.send(embed=embed)
+    await ctx.send(channel, embed=embed)
 
 load_dotenv()
 bot.run(os.getenv("DISCORD_TOKEN"))
