@@ -17,11 +17,6 @@ client_id = os.getenv("SPOTIPY_CLIENT_ID")
 client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
 redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
 
-# sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id,
-#                                                client_secret=client_secret,
-#                                                redirect_uri=redirect_uri,
-#                                                scope='playlist-read-private'))
-
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"))
 
 bot = commands.Bot(command_prefix='cook ', intents=intents)
@@ -78,26 +73,30 @@ async def recent(ctx):
     # Get the user's recently played tracks
     results = sp.current_user_recently_played(limit=50)
 
-    # Extract playlist information from the recently played tracks
-    playlist_names = set()
+    # Filter out the last 3 playlists
+    playlist_info_list = []
     for item in results["items"]:
-        if item["context"]:
-            if item["context"]["type"] == "playlist":
-                playlist_names.add(item["context"]["uri"])
+        if item["context"] and item["context"]["type"] == "playlist":
+            playlist_info = sp.playlist(item["context"]["uri"])
+            playlist_info_list.append(playlist_info)
+
+        if len(playlist_info_list) >= 3:
+            break
 
     # Create and send the embed
-    if playlist_names:
+    if playlist_info_list:
         embed = discord.Embed(
-            title="Recently Played Playlists",
+            title="Last 3 Played Playlists",
             color=discord.Color.blue()
         )
-        for playlist_uri in playlist_names:
-            playlist_info = sp.playlist(playlist_uri)
+        for playlist_info in playlist_info_list:
             embed.add_field(
                 name=playlist_info['name'],
                 value=f"[Open Playlist]({playlist_info['external_urls']['spotify']})",
                 inline=False
             )
+            if playlist_info['images']:
+                embed.set_thumbnail(url=playlist_info['images'][0]['url'])
         await ctx.send(embed=embed)
     else:
         await ctx.send("No playlists found in recently played tracks.")
