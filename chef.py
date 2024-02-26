@@ -1,11 +1,29 @@
 import discord
 import os
 import random
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 from discord.ext import commands
 from dotenv import load_dotenv
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get your Spotify API credentials from environment variables
+client_id = os.getenv("SPOTIPY_CLIENT_ID")
+client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
+
+# sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id,
+#                                                client_secret=client_secret,
+#                                                redirect_uri=redirect_uri,
+#                                                scope='playlist-read-private'))
+
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"))
+
 bot = commands.Bot(command_prefix='cook ', intents=intents)
 
 @bot.event
@@ -55,5 +73,33 @@ async def test(ctx):
     
     await ctx.send(channel, embed=embed)
 
-load_dotenv()
+@bot.command()
+async def recent(ctx):
+    # Get the user's recently played tracks
+    results = sp.current_user_recently_played(limit=50)
+
+    # Extract playlist information from the recently played tracks
+    playlist_names = set()
+    for item in results["items"]:
+        if item["context"]:
+            if item["context"]["type"] == "playlist":
+                playlist_names.add(item["context"]["uri"])
+
+    # Create and send the embed
+    if playlist_names:
+        embed = discord.Embed(
+            title="Recently Played Playlists",
+            color=discord.Color.blue()
+        )
+        for playlist_uri in playlist_names:
+            playlist_info = sp.playlist(playlist_uri)
+            embed.add_field(
+                name=playlist_info['name'],
+                value=f"[Open Playlist]({playlist_info['external_urls']['spotify']})",
+                inline=False
+            )
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send("No playlists found in recently played tracks.")
+
 bot.run(os.getenv("DISCORD_TOKEN"))
