@@ -54,7 +54,7 @@ async def test(ctx):
     channel = ctx.message.channel
     embed = discord.Embed(
         title = 'Title',
-        description = 'This is description.', 
+        description = 'This is description.',
         colour = discord.Colour.blue()
     )
 
@@ -76,29 +76,37 @@ async def recent(ctx):
     # Check if there are any recently played tracks
     if results["items"]:
         item = results["items"][0]
+        track_info = item['track']
+        
+        # Get artists' names
+        artists = ', '.join([artist['name'] for artist in track_info['artists']])
+        song_name = track_info['name']
+        
+        # Check if the track is part of a playlist
         if item["context"] and item["context"]["type"] == "playlist":
             # If the most recent item is a playlist, display the playlist information
             playlist_info = sp.playlist(item["context"]["uri"])
             embed = discord.Embed(
-                title="Most Recent Playlist",
-                description=f"[{playlist_info['name']}]({playlist_info['external_urls']['spotify']})",
+                title="Most Recent Song",
+                description=f"**{song_name}** by {artists}",
                 color=discord.Color.blue()
             )
+            embed.add_field(name="Playlist", value=f"[{playlist_info['name']}]({playlist_info['external_urls']['spotify']})", inline=False)
             if playlist_info['images']:
                 embed.set_thumbnail(url=playlist_info['images'][0]['url'])
-            await ctx.send(embed=embed)
         else:
-            # If the most recent item is a track, display the track information along with its associated playlist
-            track_info = item['track']
-            playlist_info = sp.playlist(track_info['external_urls']['spotify'])
+            # If the most recent item is not a playlist, display the album information
+            album_info = sp.album(track_info['album']['external_urls']['spotify'])
             embed = discord.Embed(
                 title="Most Recent Song",
-                description=f"[{track_info['name']}]({track_info['external_urls']['spotify']})",
+                description=f"**{song_name}** by {artists}",
                 color=discord.Color.blue()
             )
-            if playlist_info['images']:
-                embed.set_thumbnail(url=playlist_info['images'][0]['url'])
-            await ctx.send(embed=embed)
+            embed.add_field(name="Album", value=f"[{album_info['name']}]({album_info['external_urls']['spotify']})", inline=False)
+            if album_info['images']:
+                embed.set_thumbnail(url=album_info['images'][0]['url'])
+        
+        await ctx.send(embed=embed)
     else:
         await ctx.send("No recently played tracks found.")
 
