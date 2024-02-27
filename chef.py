@@ -71,34 +71,35 @@ async def test(ctx):
 @bot.command()
 async def recent(ctx):
     # Get the user's recently played tracks
-    results = sp.current_user_recently_played(limit=50)
+    results = sp.current_user_recently_played(limit=1)
 
-    # Filter out the last 3 playlists
-    playlist_info_list = []
-    for item in results["items"]:
+    # Check if there are any recently played tracks
+    if results["items"]:
+        item = results["items"][0]
         if item["context"] and item["context"]["type"] == "playlist":
+            # If the most recent item is a playlist, display the playlist information
             playlist_info = sp.playlist(item["context"]["uri"])
-            playlist_info_list.append(playlist_info)
-
-        if len(playlist_info_list) >= 3:
-            break
-
-    # Create and send the embed
-    if playlist_info_list:
-        embed = discord.Embed(
-            title="Last 3 Played Playlists",
-            color=discord.Color.blue()
-        )
-        for playlist_info in playlist_info_list:
-            embed.add_field(
-                name=playlist_info['name'],
-                value=f"[Open Playlist]({playlist_info['external_urls']['spotify']})",
-                inline=False
+            embed = discord.Embed(
+                title="Most Recent Playlist",
+                description=f"[{playlist_info['name']}]({playlist_info['external_urls']['spotify']})",
+                color=discord.Color.blue()
             )
             if playlist_info['images']:
                 embed.set_thumbnail(url=playlist_info['images'][0]['url'])
-        await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
+        else:
+            # If the most recent item is a track, display the track information along with its associated playlist
+            track_info = item['track']
+            playlist_info = sp.playlist(track_info['external_urls']['spotify'])
+            embed = discord.Embed(
+                title="Most Recent Song",
+                description=f"[{track_info['name']}]({track_info['external_urls']['spotify']})",
+                color=discord.Color.blue()
+            )
+            if playlist_info['images']:
+                embed.set_thumbnail(url=playlist_info['images'][0]['url'])
+            await ctx.send(embed=embed)
     else:
-        await ctx.send("No playlists found in recently played tracks.")
+        await ctx.send("No recently played tracks found.")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
