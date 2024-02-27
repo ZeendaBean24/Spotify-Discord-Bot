@@ -65,6 +65,7 @@ async def test(ctx):
     embed.add_field(name='Field Name', value='Field Value', inline=False)
     embed.add_field(name='Field Name', value='Field Value', inline=True)
     embed.add_field(name='Field Name', value='Field Value', inline=True)
+    embed.add_field(name=channel, value='Field Value', inline=True)
     
     await ctx.send(channel, embed=embed)
 
