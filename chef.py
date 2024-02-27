@@ -77,7 +77,7 @@ async def authenticate(ctx):
     auth_url = spotipy.SpotifyOAuth(scope="user-read-recently-played",
                                     client_id=os.getenv("SPOTIPY_CLIENT_ID"),
                                     client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
-                                    redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI")                      
+                                    redirect_uri="https://9eb7-96-125-139-130.ngrok-free.app/callback"    
                                     ).get_authorize_url()
     await ctx.send(f"Authorize the bot to access your Spotify account: {auth_url}")
     # Store the Discord ID to associate it with the access token later
