@@ -112,8 +112,14 @@ async def recent(ctx):
         await ctx.send("No recently played tracks found.")
 
 class PlaylistSelect(discord.ui.Select):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.playlists = playlists  # Store playlists for use in the class
+        
+        # Setup options based on the playlists provided
+        self.options = [
+            discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists
+        ]
     
     async def callback(self, interaction: discord.Interaction):
         # Fetch the first 20 tracks of the selected playlist
@@ -121,18 +127,25 @@ class PlaylistSelect(discord.ui.Select):
         tracks = sp.playlist_tracks(playlist_id, limit=20)['items']
         
         # Prepare the message content with track names and artists
-        tracks_message = "\n".join([f"{i+1}. {track['track']['name']} by {', '.join(artist['name'] for artist in track['track']['artists'])}" for i, track in enumerate(tracks)])
+        tracks_message = "\n".join([
+            f"{i+1}. {track['track']['name']} by {', '.join(artist['name'] for artist in track['track']['artists'])}"
+            for i, track in enumerate(tracks)
+        ])
         
-        # Edit the original message with the tracks
-        await interaction.response.edit_message(content=f"**Tracks in the selected playlist:**\n{tracks_message}", view=None)
+        # Construct a new view to include in the edited message
+        # This is necessary to reset the state of the dropdown
+        new_view = PlaylistView(playlists=self.playlists)
+        
+        # Edit the original message with the tracks, keeping the dropdown for further selections
+        await interaction.response.edit_message(content=f"**Tracks in the selected playlist:**\n{tracks_message}", view=new_view)
 
 class PlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Create a dropdown with playlist options
-        self.add_item(PlaylistSelect(options=[
+        # Correctly pass the playlists parameter to PlaylistSelect
+        self.add_item(PlaylistSelect(playlists=playlists, placeholder="Choose a playlist", options=[
             discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists
-        ], placeholder="Choose a playlist"))
+        ]))
         
 @bot.command()
 async def playlist(ctx):
