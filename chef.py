@@ -123,8 +123,8 @@ class PlaylistSelect(discord.ui.Select):
         # Prepare the message content with track names and artists
         tracks_message = "\n".join([f"{i+1}. {track['track']['name']} by {', '.join(artist['name'] for artist in track['track']['artists'])}" for i, track in enumerate(tracks)])
         
-        # Respond with the tracks
-        await interaction.response.send_message(f"**Tracks in the selected playlist:**\n{tracks_message}", ephemeral=False)
+        # Edit the original message with the tracks
+        await interaction.response.edit_message(content=f"**Tracks in the selected playlist:**\n{tracks_message}", view=None)
 
 class PlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
