@@ -136,7 +136,16 @@ class PlaylistView(discord.ui.View):
         
 @bot.command()
 async def playlist(ctx):
-    user_playlists = sp.current_user_playlists(limit=20)['items']  # Fetch the user's playlists
-    await ctx.send("Select a playlist:", view=PlaylistView(playlists=user_playlists))
+    current_user = sp.current_user()
+    user_id = current_user['id']  # Fetch the current user's Spotify ID
+    
+    playlists = sp.current_user_playlists(limit=50)['items']  # Increase limit if necessary
+    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]  # Filter for user's own playlists
+    
+    if not own_playlists:
+        await ctx.send("You don't have any playlists.")
+        return
+    
+    await ctx.send("Select one of your playlists:", view=PlaylistView(playlists=own_playlists))
 
 bot.run(os.getenv("DISCORD_TOKEN"))
