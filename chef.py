@@ -111,4 +111,31 @@ async def recent(ctx):
     else:
         await ctx.send("No recently played tracks found.")
 
+@bot.command(name='playlist')
+async def playlist(ctx):
+    # Authenticate and fetch playlists
+    playlists = sp.current_user_playlists()
+    
+    # Fetch the current user's Spotify ID for comparison
+    current_user = sp.current_user()
+    user_id = current_user['id']
+    
+    # Filter for playlists where the current user is the owner
+    own_playlists = [playlist for playlist in playlists['items'] if playlist['owner']['id'] == user_id]
+
+    # Limit to the first 25 own playlists to avoid exceeding Discord's limit
+    limited_playlists = own_playlists[:25]
+    options = [
+        discord.SelectOption(label=playlist['name'], description=playlist['id'])
+        for playlist in limited_playlists
+    ]
+
+    # Create the dropdown
+    select = discord.ui.Select(placeholder="Choose your playlist", options=options)
+    view = discord.ui.View()
+    view.add_item(select)
+
+    # Send a message with the dropdown
+    await ctx.send("Select a playlist:", view=view)
+
 bot.run(os.getenv("DISCORD_TOKEN"))
