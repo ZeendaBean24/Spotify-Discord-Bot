@@ -111,31 +111,32 @@ async def recent(ctx):
     else:
         await ctx.send("No recently played tracks found.")
 
-@bot.command(name='playlist')
+class PlaylistSelect(discord.ui.Select):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    async def callback(self, interaction: discord.Interaction):
+        # Fetch the first 20 tracks of the selected playlist
+        playlist_id = self.values[0]  # The selected playlist ID
+        tracks = sp.playlist_tracks(playlist_id, limit=20)['items']
+        
+        # Prepare the message content with track names and artists
+        tracks_message = "\n".join([f"{i+1}. {track['track']['name']} by {', '.join(artist['name'] for artist in track['track']['artists'])}" for i, track in enumerate(tracks)])
+        
+        # Respond with the tracks
+        await interaction.response.send_message(f"**Tracks in the selected playlist:**\n{tracks_message}", ephemeral=False)
+
+class PlaylistView(discord.ui.View):
+    def __init__(self, playlists, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Create a dropdown with playlist options
+        self.add_item(PlaylistSelect(options=[
+            discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists
+        ], placeholder="Choose a playlist"))
+        
+@bot.command()
 async def playlist(ctx):
-    # Authenticate and fetch playlists
-    playlists = sp.current_user_playlists()
-    
-    # Fetch the current user's Spotify ID for comparison
-    current_user = sp.current_user()
-    user_id = current_user['id']
-    
-    # Filter for playlists where the current user is the owner
-    own_playlists = [playlist for playlist in playlists['items'] if playlist['owner']['id'] == user_id]
-
-    # Limit to the first 25 own playlists to avoid exceeding Discord's limit
-    limited_playlists = own_playlists[:25]
-    options = [
-        discord.SelectOption(label=playlist['name'], description=playlist['id'])
-        for playlist in limited_playlists
-    ]
-
-    # Create the dropdown
-    select = discord.ui.Select(placeholder="Choose your playlist", options=options)
-    view = discord.ui.View()
-    view.add_item(select)
-
-    # Send a message with the dropdown
-    await ctx.send("Select a playlist:", view=view)
+    user_playlists = sp.current_user_playlists(limit=20)['items']  # Fetch the user's playlists
+    await ctx.send("Select a playlist:", view=PlaylistView(playlists=user_playlists))
 
 bot.run(os.getenv("DISCORD_TOKEN"))
