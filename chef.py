@@ -157,7 +157,7 @@ class PlaylistSelect(discord.ui.Select):
         new_view = PlaylistView(playlists=self.playlists)
         
         # Edit the original message with the genres, keeping the dropdown for further selections
-        await interaction.response.edit_message(content=f"**Top genres in the selected playlist:**\n{genres_message}", view=new_view)
+        await interaction.followup.send(content=f"**Top genres in the selected playlist:**\n{genres_message}", view=new_view)
 
 class PlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
