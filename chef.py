@@ -116,6 +116,23 @@ async def recent(ctx):
     else:
         await ctx.send("No recently played tracks found.")
 
+async def fetch_all_playlist_tracks(playlist_id):
+        tracks = []
+        offset = 0
+        while True:
+            # Fetch a page of tracks
+            response = await asyncio.to_thread(sp.playlist_tracks, playlist_id, limit=100, offset=offset)
+            tracks.extend(response['items'])
+
+            # If this page is less than the maximum limit, we've reached the end
+            if len(response['items']) < 100:
+                break
+
+            # Prepare to fetch the next page
+            offset += 100
+        
+        return tracks
+
 class PlaylistSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -132,7 +149,7 @@ class PlaylistSelect(discord.ui.Select):
 
         # Fetch the selected playlist ID
         playlist_id = self.values[0]
-        tracks = sp.playlist_tracks(playlist_id, limit=100)['items']  # You might need to paginate through tracks if there are more than 100
+        tracks = await fetch_all_playlist_tracks(playlist_id)
 
         # Initialize a dictionary to count genres
         genre_count = {}
@@ -154,8 +171,8 @@ class PlaylistSelect(discord.ui.Select):
         # Sort genres by frequency
         sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)
 
-        # Prepare the message content with top 20 genres
-        genres_message = "\n".join([f"{i+1}. {genre[0]} - {genre[1]} songs" for i, genre in enumerate(sorted_genres[:20])])
+        # Prepare the message content with top 5 genres
+        genres_message = "\n".join([f"{i+1}. {genre[0]} - {genre[1]} songs" for i, genre in enumerate(sorted_genres[:5])])
 
         # Construct a new view to include in the edited message
         new_view = PlaylistView(playlists=self.playlists)
