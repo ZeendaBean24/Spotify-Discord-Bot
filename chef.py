@@ -6,6 +6,10 @@ from spotipy.oauth2 import SpotifyOAuth
 from discord.ext import commands
 from dotenv import load_dotenv
 import urllib.parse
+import asyncio
+
+async def fetch_artist_info(artist_id):
+    return await asyncio.to_thread(sp.artist, artist_id)
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
@@ -138,7 +142,7 @@ class PlaylistSelect(discord.ui.Select):
             artists = track['track']['artists']
             for artist in artists:
                 artist_id = artist['id']
-                artist_info = sp.artist(artist_id)  # Fetch artist information
+                artist_info = await fetch_artist_info(artist_id)
                 
                 # Get genres for the artist and update the genre_count dictionary
                 for genre in artist_info['genres']:
