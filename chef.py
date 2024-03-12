@@ -123,22 +123,41 @@ class PlaylistSelect(discord.ui.Select):
         ]
     
     async def callback(self, interaction: discord.Interaction):
-        # Fetch the first 20 tracks of the selected playlist
-        playlist_id = self.values[0]  # The selected playlist ID
-        tracks = sp.playlist_tracks(playlist_id, limit=20)['items']
-        
-        # Prepare the message content with track names and artists
-        tracks_message = "\n".join([
-            f"{i+1}. {track['track']['name']} by {', '.join(artist['name'] for artist in track['track']['artists'])}"
-            for i, track in enumerate(tracks)
-        ])
-        
+        # Acknowledge the interaction immediately but indicate a response will be delayed
+        await interaction.response.defer()
+
+        # Fetch the selected playlist ID
+        playlist_id = self.values[0]
+        tracks = sp.playlist_tracks(playlist_id, limit=100)['items']  # You might need to paginate through tracks if there are more than 100
+
+        # Initialize a dictionary to count genres
+        genre_count = {}
+
+        for track in tracks:
+            # Get artist(s) for each track
+            artists = track['track']['artists']
+            for artist in artists:
+                artist_id = artist['id']
+                artist_info = sp.artist(artist_id)  # Fetch artist information
+                
+                # Get genres for the artist and update the genre_count dictionary
+                for genre in artist_info['genres']:
+                    if genre in genre_count:
+                        genre_count[genre] += 1
+                    else:
+                        genre_count[genre] = 1
+
+        # Sort genres by frequency
+        sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)
+
+        # Prepare the message content with top 20 genres
+        genres_message = "\n".join([f"{i+1}. {genre[0]} - {genre[1]} songs" for i, genre in enumerate(sorted_genres[:20])])
+
         # Construct a new view to include in the edited message
-        # This is necessary to reset the state of the dropdown
         new_view = PlaylistView(playlists=self.playlists)
         
-        # Edit the original message with the tracks, keeping the dropdown for further selections
-        await interaction.response.edit_message(content=f"**Tracks in the selected playlist:**\n{tracks_message}", view=new_view)
+        # Edit the original message with the genres, keeping the dropdown for further selections
+        await interaction.response.edit_message(content=f"**Top genres in the selected playlist:**\n{genres_message}", view=new_view)
 
 class PlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
