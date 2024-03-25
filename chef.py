@@ -170,11 +170,14 @@ class PlaylistSelect(discord.ui.Select):
             return artist_genres_cache[artist_id]
 
         for track in tracks:
+            track_genres = set()  # A set to store unique genres for this track
             artists = track['track']['artists']
             for artist in artists:
                 genres = await get_artist_genres(artist['id'])
-                for genre in genres:
-                    genre_count[genre] = genre_count.get(genre, 0) + 1
+                track_genres.update(genres)  # Add genres to the set, duplicates are automatically handled
+            # Now update the genre counts based on this track's unique genres
+            for genre in track_genres:
+                genre_count[genre] = genre_count.get(genre, 0) + 1
 
         # Sort genres by frequency and select the top 10
         sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)[:10]
