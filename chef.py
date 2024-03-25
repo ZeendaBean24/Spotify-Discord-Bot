@@ -160,11 +160,20 @@ class PlaylistSelect(discord.ui.Select):
         # Initialize a dictionary to count genres
         genre_count = {}
 
+        # Initialize a cache for artist genres
+        artist_genres_cache = {}
+
+        async def get_artist_genres(artist_id):
+            if artist_id not in artist_genres_cache:
+                artist_info = await asyncio.to_thread(sp.artist, artist_id)
+                artist_genres_cache[artist_id] = artist_info['genres']
+            return artist_genres_cache[artist_id]
+
         for track in tracks:
             artists = track['track']['artists']
             for artist in artists:
-                artist_info = await asyncio.to_thread(sp.artist, artist['id'])  # Fetch artist information asynchronously
-                for genre in artist_info['genres']:
+                genres = await get_artist_genres(artist['id'])
+                for genre in genres:
                     genre_count[genre] = genre_count.get(genre, 0) + 1
 
         # Sort genres by frequency and select the top 10
