@@ -144,41 +144,41 @@ class PlaylistSelect(discord.ui.Select):
         ]
     
     async def callback(self, interaction: discord.Interaction):
-        # Acknowledge the interaction immediately but indicate a response will be delayed
         await interaction.response.defer()
 
-        # Fetch the selected playlist ID
-        playlist_id = self.values[0]
+        playlist_id = self.values[0]  # The selected playlist ID
         tracks = await fetch_all_playlist_tracks(playlist_id)
+
+        # Basic playlist information
+        total_tracks = len(tracks)
+        # Assuming each track has a duration_ms attribute, sum them up and convert to hours, minutes, and seconds
+        total_duration_ms = sum(track['track']['duration_ms'] for track in tracks if track['track'])
+        total_seconds = total_duration_ms // 1000
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
 
         # Initialize a dictionary to count genres
         genre_count = {}
 
         for track in tracks:
-            # Get artist(s) for each track
             artists = track['track']['artists']
             for artist in artists:
-                artist_id = artist['id']
-                artist_info = await fetch_artist_info(artist_id)
-                
-                # Get genres for the artist and update the genre_count dictionary
+                artist_info = await asyncio.to_thread(sp.artist, artist['id'])  # Fetch artist information asynchronously
                 for genre in artist_info['genres']:
-                    if genre in genre_count:
-                        genre_count[genre] += 1
-                    else:
-                        genre_count[genre] = 1
+                    genre_count[genre] = genre_count.get(genre, 0) + 1
 
-        # Sort genres by frequency
-        sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)
+        # Sort genres by frequency and select the top 10
+        sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)[:10]
 
-        # Prepare the message content with top 5 genres
-        genres_message = "\n".join([f"{i+1}. {genre[0]} - {genre[1]} songs" for i, genre in enumerate(sorted_genres[:5])])
+        # Prepare the messages
+        basic_info_message = f"**Playlist Overview:**\nTotal Tracks: {total_tracks}\nTotal Duration: {hours}h {minutes}m {seconds}s\n"
+        genres_message = "\n".join([f"{i+1}. {genre[0]} - {genre[1]} songs" for i, genre in enumerate(sorted_genres)])
 
-        # Construct a new view to include in the edited message
-        new_view = PlaylistView(playlists=self.playlists)
-        
-        # Edit the original message with the genres, keeping the dropdown for further selections
-        await interaction.followup.send(content=f"**Top genres in the selected playlist:**\n{genres_message}", view=new_view)
+        # Combine messages
+        overview_message = basic_info_message + "**Top Genres:**\n" + genres_message
+
+        # Send the follow-up message with the results
+        await interaction.followup.send(overview_message)
 
 class PlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
