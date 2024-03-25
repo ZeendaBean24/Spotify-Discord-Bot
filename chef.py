@@ -202,28 +202,28 @@ async def playlist(ctx):
     
     await ctx.send("Select one of your playlists:", view=PlaylistView(playlists=own_playlists))
 
-def generate_oauth_link(client_id, redirect_uri, scope):
-    params = {
-        "client_id": client_id,
-        "response_type": "code",
-        "redirect_uri": redirect_uri,
-        "scope": scope,
-        "show_dialog": "true",  # Forces the dialog to show every time (useful for testing)
-    }
-    auth_url = "https://accounts.spotify.com/authorize?" + urllib.parse.urlencode(params)
-    return auth_url
+# def generate_oauth_link(client_id, redirect_uri, scope):
+#     params = {
+#         "client_id": client_id,
+#         "response_type": "code",
+#         "redirect_uri": redirect_uri,
+#         "scope": scope,
+#         "show_dialog": "true",  # Forces the dialog to show every time (useful for testing)
+#     }
+#     auth_url = "https://accounts.spotify.com/authorize?" + urllib.parse.urlencode(params)
+#     return auth_url
 
-@bot.command(name='authenticate')
-async def authenticate(ctx):
-    scope = "playlist-read-private"  # Add other scopes as needed
-    oauth_link = generate_oauth_link(client_id, redirect_uri, scope)
+# @bot.command(name='authenticate')
+# async def authenticate(ctx):
+#     scope = "playlist-read-private"  # Add other scopes as needed
+#     oauth_link = generate_oauth_link(client_id, redirect_uri, scope)
     
-    # Create an embed with the OAuth link
-    embed = discord.Embed(title="Authenticate with Spotify",
-                          description="Click the link below to authenticate your Spotify account with this bot.",
-                          color=0x1DB954)  # Spotify green
-    embed.add_field(name="Authentication Link", value=f"[Authorize here]({oauth_link})", inline=False)
+#     # Create an embed with the OAuth link
+#     embed = discord.Embed(title="Authenticate with Spotify",
+#                           description="Click the link below to authenticate your Spotify account with this bot.",
+#                           color=0x1DB954)  # Spotify green
+#     embed.add_field(name="Authentication Link", value=f"[Authorize here]({oauth_link})", inline=False)
     
-    await ctx.send(embed=embed)
+#     await ctx.send(embed=embed)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
