@@ -47,6 +47,9 @@ async def cmds(ctx):
         'cook greet - Greet you with a random message',
         'cook luckynumber - Tells you a random lucky number',
         'cook info - Provides info about the bot',
+        'cook test - Test command with an embedded message',
+        'cook recent - Displays the most recent Spotify track played',
+        'cook playlist - Select and view information about your Spotify playlists',
     ]
     await ctx.send('You can use the following commands: \n' + '\n'.join(commands_list))
 
