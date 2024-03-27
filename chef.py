@@ -55,7 +55,15 @@ async def cmds(ctx):
 
 @bot.command()
 async def info(ctx):
-    await ctx.send('This bot is created by @zeendabean24. It offers fun and utility commands.')
+    description = (
+        "Hey there! I'm Chef Bot, your music buddy here on Discord, lovingly crafted by @zeendabean24 and @ntcie. "
+        "My main gig? Bringing folks together through the magic of music! I've got all sorts of cool tricks "
+        "up my sleeve to help you and your pals groove along together. From checking out what's been playing lately "
+        "to digging into the nitty-gritty of your favorite playlists, I'm all about making your music journey a blast. "
+        "But hey, I'm not just about tunes! I've got plenty of other fun stuff tucked away too, so whether you're "
+        "looking to chill out with some tunes or just have a good time, I'm your go-to guy. Ready to rock? Let's jam!"
+    )
+    await ctx.send(description)
 
 @bot.command()
 async def test(ctx):
