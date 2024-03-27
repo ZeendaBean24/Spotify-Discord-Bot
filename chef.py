@@ -56,7 +56,7 @@ async def cmds(ctx):
 @bot.command()
 async def info(ctx):
     description = (
-        "Hey there! I'm Chef Bot, your music buddy here on Discord, lovingly crafted by @zeendabean24 and @ntcie. "
+        "Hey there! I'm Chef Bot, your music buddy here on Discord, lovingly crafted by **@zeendabean24** and **@ntcie**. "
         "My main gig? Bringing folks together through the magic of music! I've got all sorts of cool tricks "
         "up my sleeve to help you and your pals groove along together. From checking out what's been playing lately "
         "to digging into the nitty-gritty of your favorite playlists, I'm all about making your music journey a blast. "
