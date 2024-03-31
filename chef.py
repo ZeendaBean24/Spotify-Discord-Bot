@@ -280,11 +280,20 @@ class PopularitySelect(discord.ui.Select):
         total_estimated_streams = estimate_streams(total_popularity)
         average_estimated_streams = estimate_streams(average_popularity)
 
+        # Find the top 5 most popular tracks
+        top_tracks = sorted(tracks, key=lambda t: t['track']['popularity'], reverse=True)[:5]
+
+        top_tracks_message = "\n".join(
+            [f"{i+1}. {track['track']['name']} - Popularity: {track['track']['popularity']}"
+             for i, track in enumerate(top_tracks)]
+        )
+
         message = (f"**Playlist Popularity Overview**\n"
-                   f"**Total Popularity**: {total_popularity}\n"
-                   f"**Average Popularity**: {average_popularity:.2f}\n"
-                   f"**Total Estimated Streams**: {total_estimated_streams}\n"
-                   f"**Average Estimated Streams per Song**: {average_estimated_streams}\n")
+                   f"**Total Popularity**: {locale.format_string('%d', total_popularity, grouping=True)}\n"
+                   f"**Total Estimated Streams**: {locale.format_string('%d', total_estimated_streams, grouping=True)}\n"
+                   f"**Average Popularity**: {locale.format_string('%.2f', average_popularity, grouping=True)}\n"
+                   f"**Average Estimated Streams per Song**: {locale.format_string('%d', average_estimated_streams, grouping=True)}\n\n"    
+                   f"**Top 5 Most Popular Tracks:**\n{top_tracks_message}")
 
         await interaction.followup.send(message)
 
