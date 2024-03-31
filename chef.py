@@ -145,7 +145,6 @@ async def fetch_all_playlist_tracks(playlist_id):
             offset += 100
         
         return tracks
-
 class PlaylistSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -160,71 +159,59 @@ class PlaylistSelect(discord.ui.Select):
         await interaction.response.defer()
 
         playlist_id = self.values[0]  # The selected playlist ID
-        tracks = await fetch_all_playlist_tracks(playlist_id)
+        selected_playlist = next((p for p in self.playlists if p['id'] == playlist_id), None)
 
-        # Basic playlist information
-        total_tracks = len(tracks)
-        # Assuming each track has a duration_ms attribute, sum them up and convert to hours, minutes, and seconds
-        total_duration_ms = sum(track['track']['duration_ms'] for track in tracks if track['track'])
-        total_seconds = total_duration_ms // 1000
-        hours, remainder = divmod(total_seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
+        if selected_playlist:
+            tracks = await fetch_all_playlist_tracks(playlist_id)
 
-        # Initialize a dictionary to count genres
-        genre_count = {}
+            # Basic playlist information
+            total_tracks = len(tracks)
+            total_duration_ms = sum(track['track']['duration_ms'] for track in tracks if track['track'])
+            total_seconds = total_duration_ms // 1000
+            hours, remainder = divmod(total_seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
 
-        # Initialize a cache for artist genres
-        artist_genres_cache = {}
+            # Initialize a dictionary to count genres
+            genre_count = {}
+            artist_genres_cache = {}
 
-        async def get_artist_genres(artist_id):
-            if artist_id not in artist_genres_cache:
-                artist_info = await asyncio.to_thread(sp.artist, artist_id)
-                artist_genres_cache[artist_id] = artist_info['genres']
-            return artist_genres_cache[artist_id]
+            async def get_artist_genres(artist_id):
+                if artist_id not in artist_genres_cache:
+                    artist_info = await asyncio.to_thread(sp.artist, artist_id)
+                    artist_genres_cache[artist_id] = artist_info['genres']
+                return artist_genres_cache[artist_id]
 
-        for track in tracks:
-            track_genres = set()  # A set to store unique genres for this track
-            artists = track['track']['artists']
-            for artist in artists:
-                genres = await get_artist_genres(artist['id'])
-                track_genres.update(genres)  # Add genres to the set, duplicates are automatically handled
-            # Now update the genre counts based on this track's unique genres
-            for genre in track_genres:
-                genre_count[genre] = genre_count.get(genre, 0) + 1
+            for track in tracks:
+                track_genres = set()
+                artists = track['track']['artists']
+                for artist in artists:
+                    genres = await get_artist_genres(artist['id'])
+                    track_genres.update(genres)
+                for genre in track_genres:
+                    genre_count[genre] = genre_count.get(genre, 0) + 1
 
-        # Sort genres by frequency and select the top 10
-        sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)[:5]
+            sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)[:5]
+            genres_message = "\n".join(f"{i+1}. {genre} - {count} songs ({(count / total_tracks) * 100:.2f}%)" for i, (genre, count) in enumerate(sorted_genres))
 
-        # Prepare the messages
-        basic_info_message = f"**Playlist Overview:**\nTotal Tracks: {total_tracks}\nTotal Duration: {hours}h {minutes}m {seconds}s\n"
+            overview_message = (f"**{selected_playlist['name']} - Playlist Overview:**\n"
+                                f"Total Tracks: {total_tracks}\n"
+                                f"Total Duration: {hours}h {minutes}m {seconds}s\n\n"
+                                f"**Top Genres:**\n{genres_message}")
 
-        # Updated genres message to include the percentage
-        genres_message = ""
-        for i, (genre, count) in enumerate(sorted_genres):
-            percentage = (count / total_tracks) * 100  # Calculate percentage
-            genres_message += f"{i+1}. {genre} - {count} songs ({percentage:.2f}%)\n"
-
-        # Combine messages
-        overview_message = basic_info_message + "**Top Genres:**\n" + genres_message
-
-        # Send the follow-up message with the results
-        await interaction.followup.send(overview_message)
+            await interaction.followup.send(overview_message)
 
 class PlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Correctly pass the playlists parameter to PlaylistSelect
-        self.add_item(PlaylistSelect(playlists=playlists, placeholder="Choose a playlist", options=[
-            discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists
-        ]))
-        
+        self.add_item(PlaylistSelect(playlists=playlists, placeholder="Choose a playlist"))
+
 @bot.command()
 async def genres(ctx):
     current_user = sp.current_user()
-    user_id = current_user['id']  # Fetch the current user's Spotify ID
+    user_id = current_user['id']
     
-    playlists = sp.current_user_playlists(limit=50)['items']  # Increase limit if necessary
-    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]  # Filter for user's own playlists
+    playlists = sp.current_user_playlists(limit=50)['items']
+    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
     
     if not own_playlists:
         await ctx.send("You don't have any playlists.")
@@ -310,5 +297,5 @@ async def popularity(ctx):
         return
 
     await ctx.send("Select one of your playlists to analyze popularity:", view=PopularityView(playlists=own_playlists))
-    
+
 bot.run(os.getenv("DISCORD_TOKEN"))
