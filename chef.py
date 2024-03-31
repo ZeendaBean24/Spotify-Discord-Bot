@@ -288,8 +288,7 @@ class PopularitySelect(discord.ui.Select):
              for i, track in enumerate(top_tracks)]
         )
 
-        message = (f"**Playlist Popularity Overview**\n\n"
-                   f"**Total Popularity**: {locale.format_string('%d', total_popularity, grouping=True)}\n"
+        message = (f"**Total Popularity**: {locale.format_string('%d', total_popularity, grouping=True)}\n"
                    f"**Total Estimated Streams**: {locale.format_string('%d', total_estimated_streams, grouping=True)}\n"
                    f"**Average Popularity**: {locale.format_string('%.2f', average_popularity, grouping=True)}\n"
                    f"**Average Estimated Streams per Song**: {locale.format_string('%d', average_estimated_streams, grouping=True)}\n\n"    
