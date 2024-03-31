@@ -28,66 +28,66 @@ redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"))
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = discord.Bot(intents=intents)
 
 @bot.event
 async def on_ready():
     print(f'Successful! Logged in as {bot.user.name}')
 
-@bot.slash_command()
+@bot.slash_command(description="Greet you with a random message")
 async def greet(ctx):
     responses = ['Hello, hope you have a great day!', 'Hi there, welcome!', 'Greetings!']
     await ctx.send(random.choice(responses))
 
-@bot.slash_command()
+@bot.slash_command(description="Tells your lucky number")
 async def luckynumber(ctx):
     number = random.randint(1, 100)  # Random number between 1 and 100
     await ctx.send(f"Your lucky number today is: {number}")
 
-@bot.slash_command()
+@bot.slash_command(description="Lists all available commands")
 async def cmds(ctx):
     commands_list = [
         '**/cmds - Lists all available commands**',
         '/greet - Greet you with a random message',
-        '/luckynumber - Tells you a random lucky number',
+        '/luckynumber - Tells your lucky number',
         '**/info - Provides info about the bot**',
-        '/test - Test command with an embedded message',
+        # '/test - Test command with an embedded message',
         '**/recent - Displays the most recent Spotify track played',
         '**/genres - Shows the top genres in a Spotify playlist**',
         '**/popularity - Analyzes the popularity of a Spotify playlist**'
     ]
     await ctx.send('You can use the following commands: \n' + '\n'.join(commands_list))
 
-@bot.command()
+@bot.slash_command(description="Provides info about the bot")
 async def info(ctx):
-    description = (
+    desc = (
         "Hey there! I'm Spotify Chef Bot, your music buddy here on Discord, by **@zeendabean24** and **@ntcie**." 
         "I bring folks together and have many cool tricks to connect you and your pals through music."
-        "Use the prefix **'!'** and the command **!cmds** to start!"
+        "Use the prefix **'/'** and the command **/cmds** to start!"
     )
-    await ctx.send(description)
+    await ctx.send(desc)
 
-@bot.command()
-async def test(ctx):
-    channel = ctx.message.channel
-    embed = discord.Embed(
-        title = 'Title',
-        description = 'This is description.',
-        colour = discord.Colour.blue()
-    )
+# @bot.slash_command(description="test")
+# async def test(ctx):
+#     channel = ctx.message.channel
+#     embed = discord.Embed(
+#         title = 'Title',
+#         description = 'This is description.',
+#         colour = discord.Colour.blue()
+#     )
 
-    embed.set_footer(text='This is a footer')
-    embed.set_image(url='https://archive.org/download/discordprofilepictures//discordblue.png')
-    embed.set_thumbnail(url='https://archive.org/download/discordprofilepictures//discordblue.png')
-    embed.set_author(name='Zeen Liu', icon_url='https://archive.org/download/discordprofilepictures//discordblue.png')
-    embed.add_field(name='Field Name', value='Field Value', inline=False)
-    embed.add_field(name='Field Name', value='Field Value', inline=True)
-    embed.add_field(name='Field Name', value='Field Value', inline=True)
-    embed.add_field(name=channel, value='Field Value', inline=True)
+#     embed.set_footer(text='This is a footer')
+#     embed.set_image(url='https://archive.org/download/discordprofilepictures//discordblue.png')
+#     embed.set_thumbnail(url='https://archive.org/download/discordprofilepictures//discordblue.png')
+#     embed.set_author(name='Zeen Liu', icon_url='https://archive.org/download/discordprofilepictures//discordblue.png')
+#     embed.add_field(name='Field Name', value='Field Value', inline=False)
+#     embed.add_field(name='Field Name', value='Field Value', inline=True)
+#     embed.add_field(name='Field Name', value='Field Value', inline=True)
+#     embed.add_field(name=channel, value='Field Value', inline=True)
     
-    await ctx.send(channel, embed=embed)
+#     await ctx.send(channel, embed=embed)
 
-@bot.command()
+@bot.slash_command(description="Displays the most recent Spotify track played")
 async def recent(ctx):
     # Get the user's recently played tracks
     results = sp.current_user_recently_played(limit=1)
@@ -218,7 +218,7 @@ class PlaylistView(discord.ui.View):
             discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists
         ]))
         
-@bot.command()
+@bot.slash_command(description="Shows the top genres in a Spotify playlist")
 async def genres(ctx):
     current_user = sp.current_user()
     user_id = current_user['id']  # Fetch the current user's Spotify ID
@@ -302,7 +302,7 @@ class PopularityView(discord.ui.View):
         super().__init__(*args, **kwargs)
         self.add_item(PopularitySelect(playlists=playlists, placeholder="Choose a playlist"))
 
-@bot.command()
+@bot.slash_command(description="Analyzes the popularity of a Spotify playlist")
 async def popularity(ctx):
     current_user = sp.current_user()
     user_id = current_user['id']
