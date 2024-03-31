@@ -5,9 +5,9 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from discord.ext import commands
 from dotenv import load_dotenv
-import urllib.parse
 import asyncio
 import locale
+# import urllib.parse
 
 # Set the locale to the user's default setting (for number formatting)
 locale.setlocale(locale.LC_ALL, '')
