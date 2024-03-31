@@ -34,26 +34,27 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print(f'Successful! Logged in as {bot.user.name}')
 
-@bot.command()
+@bot.slash_command()
 async def greet(ctx):
     responses = ['Hello, hope you have a great day!', 'Hi there, welcome!', 'Greetings!']
     await ctx.send(random.choice(responses))
 
-@bot.command()
+@bot.slash_command()
 async def luckynumber(ctx):
     number = random.randint(1, 100)  # Random number between 1 and 100
     await ctx.send(f"Your lucky number today is: {number}")
 
-@bot.command()
+@bot.slash_command()
 async def cmds(ctx):
     commands_list = [
-        '**!cmds - Lists all available commands**',
-        '!greet - Greet you with a random message',
-        '!luckynumber - Tells you a random lucky number',
-        '**!info - Provides info about the bot**',
-        '!test - Test command with an embedded message',
-        '**!recent - Displays the most recent Spotify track played',
-        '**!genres - Select and view information about your Spotify playlists**',
+        '**/cmds - Lists all available commands**',
+        '/greet - Greet you with a random message',
+        '/luckynumber - Tells you a random lucky number',
+        '**/info - Provides info about the bot**',
+        '/test - Test command with an embedded message',
+        '**/recent - Displays the most recent Spotify track played',
+        '**/genres - Shows the top genres in a Spotify playlist**',
+        '**/popularity - Analyzes the popularity of a Spotify playlist**'
     ]
     await ctx.send('You can use the following commands: \n' + '\n'.join(commands_list))
 
