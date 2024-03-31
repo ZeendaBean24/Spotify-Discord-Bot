@@ -43,13 +43,13 @@ async def luckynumber(ctx):
 @bot.command()
 async def cmds(ctx):
     commands_list = [
-        '!cmds - Lists all available commands',
+        '**!cmds - Lists all available commands**',
         '!greet - Greet you with a random message',
         '!luckynumber - Tells you a random lucky number',
-        '!info - Provides info about the bot',
+        '**!info - Provides info about the bot**',
         '!test - Test command with an embedded message',
-        '!recent - Displays the most recent Spotify track played',
-        '!genres - Select and view information about your Spotify playlists',
+        '**!recent - Displays the most recent Spotify track played',
+        '**!genres - Select and view information about your Spotify playlists**',
     ]
     await ctx.send('You can use the following commands: \n' + '\n'.join(commands_list))
 
@@ -250,5 +250,52 @@ async def genres(ctx):
 #     embed.add_field(name="Authentication Link", value=f"[Authorize here]({oauth_link})", inline=False)
     
 #     await ctx.send(embed=embed)
+
+class PopularitySelect(discord.ui.Select):
+    def __init__(self, playlists, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.playlists = playlists
+
+        self.options = [
+            discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists
+        ]
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
+        playlist_id = self.values[0]
+        tracks = await fetch_all_playlist_tracks(playlist_id)
+
+        # Calculate total popularity and find the top 5 popular tracks
+        total_popularity = sum(track['track']['popularity'] for track in tracks if track['track'])
+        average_popularity = total_popularity / len(tracks) if tracks else 0
+        top_tracks = sorted(tracks, key=lambda t: t['track']['popularity'], reverse=True)[:5]
+
+        message = f"**Playlist Popularity Overview**\nTotal Popularity: {total_popularity}\nAverage Popularity: {average_popularity:.2f}\n\n**Top 5 Tracks:**\n"
+        for i, track in enumerate(top_tracks, start=1):
+            track_name = track['track']['name']
+            track_popularity = track['track']['popularity']
+            message += f"{i}. {track_name} - Popularity: {track_popularity}\n"
+
+        await interaction.followup.send(message)
+
+class PopularityView(discord.ui.View):
+    def __init__(self, playlists, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_item(PopularitySelect(playlists=playlists, placeholder="Choose a playlist"))
+
+@bot.command()
+async def popularity(ctx):
+    current_user = sp.current_user()
+    user_id = current_user['id']
+
+    playlists = sp.current_user_playlists(limit=50)['items']
+    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+
+    if not own_playlists:
+        await ctx.send("You don't have any playlists.")
+        return
+
+    await ctx.send("Select one of your playlists to analyze popularity:", view=PopularityView(playlists=own_playlists))
 
 bot.run(os.getenv("DISCORD_TOKEN"))
