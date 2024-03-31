@@ -188,7 +188,7 @@ class PlaylistSelect(discord.ui.Select):
                 genre_count[genre] = genre_count.get(genre, 0) + 1
 
         # Sort genres by frequency and select the top 10
-        sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)[:10]
+        sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)[:5]
 
         # Prepare the messages
         basic_info_message = f"**Playlist Overview:**\nTotal Tracks: {total_tracks}\nTotal Duration: {hours}h {minutes}m {seconds}s\n"
