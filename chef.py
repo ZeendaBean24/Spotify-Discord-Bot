@@ -49,7 +49,7 @@ async def cmds(ctx):
         '!info - Provides info about the bot',
         '!test - Test command with an embedded message',
         '!recent - Displays the most recent Spotify track played',
-        '!playlist - Select and view information about your Spotify playlists',
+        '!genres - Select and view information about your Spotify playlists',
     ]
     await ctx.send('You can use the following commands: \n' + '\n'.join(commands_list))
 
@@ -214,7 +214,7 @@ class PlaylistView(discord.ui.View):
         ]))
         
 @bot.command()
-async def playlist(ctx):
+async def genres(ctx):
     current_user = sp.current_user()
     user_id = current_user['id']  # Fetch the current user's Spotify ID
     
