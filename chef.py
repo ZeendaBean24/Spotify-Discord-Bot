@@ -281,10 +281,10 @@ class PopularitySelect(discord.ui.Select):
         average_estimated_streams = estimate_streams(average_popularity)
 
         message = (f"**Playlist Popularity Overview**\n"
-                   f"Total Popularity: {total_popularity}\n"
-                   f"Average Popularity: {average_popularity:.2f}\n"
-                   f"Total Estimated Streams: {total_estimated_streams}\n"
-                   f"Average Estimated Streams per Song: {average_estimated_streams}\n")
+                   f"**Total Popularity**: {total_popularity}\n"
+                   f"**Average Popularity**: {average_popularity:.2f}\n"
+                   f"**Total Estimated Streams**: {total_estimated_streams}\n"
+                   f"**Average Estimated Streams per Song**: {average_estimated_streams}\n")
 
         await interaction.followup.send(message)
 
