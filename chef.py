@@ -43,25 +43,22 @@ async def luckynumber(ctx):
 @bot.command()
 async def cmds(ctx):
     commands_list = [
-        'cook cmds - Lists all available commands',
-        'cook greet - Greet you with a random message',
-        'cook luckynumber - Tells you a random lucky number',
-        'cook info - Provides info about the bot',
-        'cook test - Test command with an embedded message',
-        'cook recent - Displays the most recent Spotify track played',
-        'cook playlist - Select and view information about your Spotify playlists',
+        '!cmds - Lists all available commands',
+        '!greet - Greet you with a random message',
+        '!luckynumber - Tells you a random lucky number',
+        '!info - Provides info about the bot',
+        '!test - Test command with an embedded message',
+        '!recent - Displays the most recent Spotify track played',
+        '!playlist - Select and view information about your Spotify playlists',
     ]
     await ctx.send('You can use the following commands: \n' + '\n'.join(commands_list))
 
 @bot.command()
 async def info(ctx):
     description = (
-        "Hey there! I'm Chef Bot, your music buddy here on Discord, lovingly crafted by **@zeendabean24** and **@ntcie**. "
-        "My main gig? Bringing folks together through the magic of music! I've got all sorts of cool tricks "
-        "up my sleeve to help you and your pals groove along together. From checking out what's been playing lately "
-        "to digging into the nitty-gritty of your favorite playlists, I'm all about making your music journey a blast. "
-        "But hey, I'm not just about tunes! I've got plenty of other fun stuff tucked away too, so whether you're "
-        "looking to chill out with some tunes or just have a good time, I'm your go-to guy. Ready to rock? Let's jam!"
+        "Hey there! I'm Spotify Chef Bot, your music buddy here on Discord, by **@zeendabean24** and **@ntcie**." 
+        "I bring folks together and have many cool tricks to connect you and your pals through music."
+        "Use the prefix **'!'** and the command **!cmds** to start!"
     )
     await ctx.send(description)
 
