@@ -7,6 +7,10 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import urllib.parse
 import asyncio
+import locale
+
+# Set the locale to the user's default setting (for number formatting)
+locale.setlocale(locale.LC_ALL, '')
 
 async def fetch_artist_info(artist_id):
     return await asyncio.to_thread(sp.artist, artist_id)
