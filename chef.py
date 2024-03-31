@@ -263,39 +263,35 @@ class PopularitySelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.playlists = playlists
-
-        self.options = [
-            discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists
-        ]
+        self.options = [discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists]
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
-
         playlist_id = self.values[0]
-        tracks = await fetch_all_playlist_tracks(playlist_id)
+        selected_playlist = next((p for p in self.playlists if p['id'] == playlist_id), None)
 
-        total_popularity = sum(track['track']['popularity'] for track in tracks if track['track'])
-        average_popularity = total_popularity / len(tracks) if tracks else 0
+        if selected_playlist:
+            tracks = await fetch_all_playlist_tracks(playlist_id)
+            total_popularity = sum(track['track']['popularity'] for track in tracks if track['track'])
+            average_popularity = total_popularity / len(tracks) if tracks else 0
 
-        # Convert popularity to estimated streams
-        total_estimated_streams = estimate_streams(total_popularity)
-        average_estimated_streams = estimate_streams(average_popularity)
+            total_estimated_streams = estimate_streams(total_popularity)
+            average_estimated_streams = estimate_streams(average_popularity)
 
-        # Find the top 5 most popular tracks
-        top_tracks = sorted(tracks, key=lambda t: t['track']['popularity'], reverse=True)[:5]
+            top_tracks = sorted(tracks, key=lambda t: t['track']['popularity'], reverse=True)[:5]
+            top_tracks_message = "\n".join(
+                [f"{i+1}. {track['track']['name']} - Popularity: {track['track']['popularity']}"
+                 for i, track in enumerate(top_tracks)]
+            )
 
-        top_tracks_message = "\n".join(
-            [f"{i+1}. {track['track']['name']} - Popularity: {track['track']['popularity']}"
-             for i, track in enumerate(top_tracks)]
-        )
+            message = (f"**Playlist: {selected_playlist['name']}**\n"
+                       f"**Total Popularity**: {locale.format_string('%d', total_popularity, grouping=True)}\n"
+                       f"**Total Estimated Streams**: {locale.format_string('%d', total_estimated_streams, grouping=True)}\n"
+                       f"**Average Popularity**: {locale.format_string('%.2f', average_popularity, grouping=True)}\n"
+                       f"**Average Estimated Streams per Song**: {locale.format_string('%d', average_estimated_streams, grouping=True)}\n\n"    
+                       f"**Top 5 Most Popular Tracks:**\n{top_tracks_message}")
 
-        message = (f"**Total Popularity**: {locale.format_string('%d', total_popularity, grouping=True)}\n"
-                   f"**Total Estimated Streams**: {locale.format_string('%d', total_estimated_streams, grouping=True)}\n"
-                   f"**Average Popularity**: {locale.format_string('%.2f', average_popularity, grouping=True)}\n"
-                   f"**Average Estimated Streams per Song**: {locale.format_string('%d', average_estimated_streams, grouping=True)}\n\n"    
-                   f"**Top 5 Most Popular Tracks:**\n{top_tracks_message}")
-
-        await interaction.followup.send(message)
+            await interaction.followup.send(message)
 
 class PopularityView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
@@ -306,7 +302,6 @@ class PopularityView(discord.ui.View):
 async def popularity(ctx):
     current_user = sp.current_user()
     user_id = current_user['id']
-
     playlists = sp.current_user_playlists(limit=50)['items']
     own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
@@ -315,5 +310,5 @@ async def popularity(ctx):
         return
 
     await ctx.send("Select one of your playlists to analyze popularity:", view=PopularityView(playlists=own_playlists))
-
+    
 bot.run(os.getenv("DISCORD_TOKEN"))
