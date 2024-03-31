@@ -192,7 +192,12 @@ class PlaylistSelect(discord.ui.Select):
 
         # Prepare the messages
         basic_info_message = f"**Playlist Overview:**\nTotal Tracks: {total_tracks}\nTotal Duration: {hours}h {minutes}m {seconds}s\n"
-        genres_message = "\n".join([f"{i+1}. {genre[0]} - {genre[1]} songs" for i, genre in enumerate(sorted_genres)])
+
+        # Updated genres message to include the percentage
+        genres_message = ""
+        for i, (genre, count) in enumerate(sorted_genres):
+            percentage = (count / total_tracks) * 100  # Calculate percentage
+            genres_message += f"{i+1}. {genre} - {count} songs ({percentage:.2f}%)\n"
 
         # Combine messages
         overview_message = basic_info_message + "**Top Genres:**\n" + genres_message
