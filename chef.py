@@ -56,7 +56,7 @@ async def cmds(ctx):
         '**!genres - Shows the top genres in a Spotify playlist**',
         '**!popularity - Analyzes the popularity of a Spotify playlist**'
     ]
-    await ctx.send('You can use the following commands: \n' + '\n'.join(commands_list))
+    await ctx.send('**You can use the following commands**: \n' + '\n'.join(commands_list))
 
 @bot.command()
 async def info(ctx):
