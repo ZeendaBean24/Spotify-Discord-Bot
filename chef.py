@@ -251,6 +251,9 @@ async def genres(ctx):
     
 #     await ctx.send(embed=embed)
 
+def estimate_streams(popularity, max_streams=100000000, min_streams=10000):
+    return int(min_streams + (popularity / 100) * (max_streams - min_streams))
+
 class PopularitySelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -266,16 +269,18 @@ class PopularitySelect(discord.ui.Select):
         playlist_id = self.values[0]
         tracks = await fetch_all_playlist_tracks(playlist_id)
 
-        # Calculate total popularity and find the top 5 popular tracks
         total_popularity = sum(track['track']['popularity'] for track in tracks if track['track'])
         average_popularity = total_popularity / len(tracks) if tracks else 0
-        top_tracks = sorted(tracks, key=lambda t: t['track']['popularity'], reverse=True)[:5]
 
-        message = f"**Playlist Popularity Overview**\nTotal Popularity: {total_popularity}\nAverage Popularity: {average_popularity:.2f}\n\n**Top 5 Tracks:**\n"
-        for i, track in enumerate(top_tracks, start=1):
-            track_name = track['track']['name']
-            track_popularity = track['track']['popularity']
-            message += f"{i}. {track_name} - Popularity: {track_popularity}\n"
+        # Convert popularity to estimated streams
+        total_estimated_streams = estimate_streams(total_popularity)
+        average_estimated_streams = estimate_streams(average_popularity)
+
+        message = (f"**Playlist Popularity Overview**\n"
+                   f"Total Popularity: {total_popularity}\n"
+                   f"Average Popularity: {average_popularity:.2f}\n"
+                   f"Total Estimated Streams: {total_estimated_streams}\n"
+                   f"Average Estimated Streams per Song: {average_estimated_streams}\n")
 
         await interaction.followup.send(message)
 
