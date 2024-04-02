@@ -392,7 +392,7 @@ class GuessGameSelect(discord.ui.Select):
 
         embed = discord.Embed(
             title="Guess the Album and Artist!",
-            description="Type your guess in the format `album name / artist name`. You get 10 attempts! Hints will be progressively provided as you guess incorrectly. Type `exit` to end the game at any point.",
+            description="Type your guess in the format `album name / artist name`. **You get 10 attempts!** *Hints will be progressively provided as you guess incorrectly.* Type `exit` to end the game at any point.",
             color=discord.Color.blue()
         )
         embed.set_image(url=album_cover_url)
