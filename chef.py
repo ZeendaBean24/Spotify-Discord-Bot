@@ -299,7 +299,7 @@ async def popularity(ctx):
     await ctx.send("Select one of your playlists to analyze popularity:", view=PopularityView(playlists=own_playlists))
 
 @bot.command()
-async def albums(ctx):
+async def randomsong(ctx):
     user_id = sp.current_user()['id']
     playlists = sp.current_user_playlists(limit=50)['items']
     own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
@@ -345,5 +345,87 @@ class PlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_item(RandomSongSelect(playlists=playlists, placeholder="Choose a playlist"))
+
+# Global dictionary to track ongoing games by channel
+ongoing_games = {}
+
+@bot.command()
+async def guessalbum(ctx):
+    user_id = sp.current_user()['id']
+    playlists = sp.current_user_playlists(limit=50)['items']
+    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+
+    if not own_playlists:
+        await ctx.send("You don't have any private playlists.")
+        return
+
+    await ctx.send("Select one of your private playlists:", view=PlaylistView(playlists=own_playlists))
+
+class GuessGameSelect(discord.ui.Select):
+    def __init__(self, playlists, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.playlists = playlists
+        self.options = [discord.SelectOption(label=playlist['name'], description=str(playlist['id']), value=playlist['id']) for playlist in playlists]
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        playlist_id = self.values[0]
+        tracks = await fetch_all_playlist_tracks(playlist_id)
+
+        if not tracks:
+            await interaction.followup.send("The selected playlist is empty.")
+            return
+
+        # Select a random song
+        selected_track = random.choice(tracks)['track']
+        song_name = selected_track['name']
+        album_name = selected_track['album']['name']
+        album_cover_url = selected_track['album']['images'][0]['url']
+        artists = ', '.join([artist['name'] for artist in selected_track['artists']])
+
+        # Store game data
+        ongoing_games[interaction.channel_id] = {
+            "album_name": album_name.lower(),
+            "artist_name": artists.lower(),
+            "attempts": 0
+        }
+
+        embed = discord.Embed(
+            title="Guess the Album and Artist!",
+            description="Type your guess in the format `album name / artist name`. Type `exit` to end the game.",
+            color=discord.Color.blue()
+        )
+        embed.set_image(url=album_cover_url)
+
+        await interaction.followup.send(embed=embed)
+
+class PlaylistView(discord.ui.View):
+    def __init__(self, playlists, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_item(GuessGameSelect(playlists=playlists, placeholder="Choose a playlist"))
+
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
+
+    # Check if there is an ongoing game in this channel
+    game_data = ongoing_games.get(message.channel.id)
+    if game_data:
+        guess = message.content.lower().strip()
+        if guess == 'exit':
+            await message.channel.send("Game ended. Thanks for playing!")
+            del ongoing_games[message.channel.id]
+            return
+
+        album_name, artist_name = game_data['album_name'], game_data['artist_name']
+        if guess == f"{album_name} / {artist_name}":
+            await message.channel.send("Congratulations! You guessed correctly!")
+            del ongoing_games[message.channel.id]
+        else:
+            game_data['attempts'] += 1
+            await message.channel.send("Not quite right, try again! Or type `exit` to end the game.")
+
+    await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
