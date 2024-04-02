@@ -409,6 +409,9 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
+    # Ensure this doesn't block other commands
+    await bot.process_commands(message)
+
     # Check if there is an ongoing game in this channel
     game_data = ongoing_games.get(message.channel.id)
     if game_data:
@@ -419,13 +422,21 @@ async def on_message(message):
             return
 
         album_name, artist_name = game_data['album_name'], game_data['artist_name']
-        if guess == f"{album_name} / {artist_name}":
-            await message.channel.send("Congratulations! You guessed correctly!")
+        guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]  # Safely extract guesses
+
+        if guessed_album == album_name and guessed_artist == artist_name:
+            await message.channel.send("Congratulations! You guessed both the album and the artist correctly!")
             del ongoing_games[message.channel.id]
         else:
-            game_data['attempts'] += 1
-            await message.channel.send("Not quite right, try again! Or type `exit` to end the game.")
+            response_message = "Not quite right. "
+            if guessed_album == album_name:
+                response_message += "You got the album name correct! "
+            elif guessed_artist == artist_name:
+                response_message += "You got the artist name correct! "
+            else:
+                response_message += "Both the album name and artist name are incorrect. "
 
-    await bot.process_commands(message)
+            response_message += "Try again, or type `exit` to end the game."
+            await message.channel.send(response_message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
