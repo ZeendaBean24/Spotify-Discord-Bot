@@ -409,34 +409,40 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-    # Ensure this doesn't block other commands
-    await bot.process_commands(message)
-
-    # Check if there is an ongoing game in this channel
+    # Check if there's an ongoing game in this channel
     game_data = ongoing_games.get(message.channel.id)
     if game_data:
-        guess = message.content.lower().strip()
-        if guess == 'exit':
-            await message.channel.send("Game ended. Thanks for playing!")
-            del ongoing_games[message.channel.id]
-            return
-
-        album_name, artist_name = game_data['album_name'], game_data['artist_name']
-        guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]  # Safely extract guesses
-
-        if guessed_album == album_name and guessed_artist == artist_name:
-            await message.channel.send("Congratulations! You guessed both the album and the artist correctly!")
+        # If the message is a command, end the game
+        if message.content.startswith('!'):
+            await message.channel.send("Game ended because a new command was entered.")
             del ongoing_games[message.channel.id]
         else:
-            response_message = "Not quite right. "
-            if guessed_album == album_name:
-                response_message += "You got the album name correct! "
-            elif guessed_artist == artist_name:
-                response_message += "You got the artist name correct! "
-            else:
-                response_message += "Both the album name and artist name are incorrect. "
+            guess = message.content.lower().strip()
+            if guess == 'exit':
+                await message.channel.send("Game ended. Thanks for playing!")
+                del ongoing_games[message.channel.id]
+                return
 
-            response_message += "Try again, or type `exit` to end the game."
-            await message.channel.send(response_message)
+            album_name, artist_name = game_data['album_name'], game_data['artist_name']
+            guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]  # Safely extract guesses
+
+            if guessed_album == album_name and guessed_artist == artist_name:
+                await message.channel.send("Congratulations! You guessed both the album and the artist correctly!")
+                del ongoing_games[message.channel.id]
+            else:
+                response_message = "Not quite right. "
+                if guessed_album == album_name:
+                    response_message += "You got the album name correct! "
+                elif guessed_artist == artist_name:
+                    response_message += "You got the artist name correct! "
+                else:
+                    response_message += "Both the album name and artist name are incorrect. "
+
+                response_message += "Try again, or type `exit` to end the game."
+                await message.channel.send(response_message)
+
+    # Process other commands after checking for game conditions
+    await bot.process_commands(message)
+
 
 bot.run(os.getenv("DISCORD_TOKEN"))
