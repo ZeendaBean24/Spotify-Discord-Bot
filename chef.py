@@ -392,7 +392,7 @@ class GuessGameSelect(discord.ui.Select):
 
         embed = discord.Embed(
             title="Guess the Album and Artist!",
-            description="Type your guess in the format `album name / artist name`. Type `exit` to end the game.",
+            description="Type your guess in the format `album name / artist name`. You get 10 attempts! Hints will be progressively provided as you guess incorrectly. Type `exit` to end the game at any point.",
             color=discord.Color.blue()
         )
         embed.set_image(url=album_cover_url)
@@ -436,8 +436,8 @@ async def on_message(message):
         if guessed_album == album_name and guessed_artist == artist_name:
             await message.channel.send("Congratulations! You guessed both the album and the artist correctly!")
             del ongoing_games[message.channel.id]
-        elif game_data['attempts'] >= 3:
-            await message.channel.send(f"Too many attempts! The correct answer was `{album_name} / {artist_name}`.")
+        elif game_data['attempts'] >= 10:
+            await message.channel.send(f"Exceeded 10 attempts! The correct answer was `{album_name} / {artist_name}`.")
             del ongoing_games[message.channel.id]
         else:
             response_message = "Not quite right. "
