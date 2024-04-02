@@ -305,32 +305,45 @@ async def albums(ctx):
     own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
     if not own_playlists:
-        await ctx.send("You don't have any playlists.")
+        await ctx.send("You don't have any private playlists.")
         return
 
-    # Select a random playlist
-    selected_playlist = random.choice(own_playlists)
-    playlist_id = selected_playlist['id']
-    tracks = await fetch_all_playlist_tracks(playlist_id)
+    await ctx.send("Select one of your private playlists:", view=PlaylistView(playlists=own_playlists))
 
-    if not tracks:
-        await ctx.send("The selected playlist is empty.")
-        return
+class RandomSongSelect(discord.ui.Select):
+    def __init__(self, playlists, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.playlists = playlists
+        self.options = [discord.SelectOption(label=playlist['name'], description=str(playlist['id']), value=playlist['id']) for playlist in playlists]
+    
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        playlist_id = self.values[0]
+        tracks = await fetch_all_playlist_tracks(playlist_id)
 
-    # Select a random song
-    selected_track = random.choice(tracks)['track']
-    song_name = selected_track['name']
-    album_cover_url = selected_track['album']['images'][0]['url']
+        if not tracks:
+            await interaction.followup.send("The selected playlist is empty.")
+            return
 
-    # Send the album cover image along with the song name and artist
-    artists = ', '.join([artist['name'] for artist in selected_track['artists']])
-    embed = discord.Embed(
-        title=f"Random Song: {song_name}",
-        description=f"Artist(s): {artists}",
-        color=discord.Color.blue()
-    )
-    embed.set_image(url=album_cover_url)
+        # Select a random song
+        selected_track = random.choice(tracks)['track']
+        song_name = selected_track['name']
+        album_cover_url = selected_track['album']['images'][0]['url']
 
-    await ctx.send(embed=embed)
+        # Send the album cover image along with the song name and artist
+        artists = ', '.join([artist['name'] for artist in selected_track['artists']])
+        embed = discord.Embed(
+            title=f"Random Song: {song_name}",
+            description=f"Artist(s): {artists}",
+            color=discord.Color.blue()
+        )
+        embed.set_image(url=album_cover_url)
+
+        await interaction.followup.send(embed=embed)
+
+class PlaylistView(discord.ui.View):
+    def __init__(self, playlists, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_item(RandomSongSelect(playlists=playlists, placeholder="Choose a playlist"))
 
 bot.run(os.getenv("DISCORD_TOKEN"))
