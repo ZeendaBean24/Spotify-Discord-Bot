@@ -350,7 +350,7 @@ class PlaylistView(discord.ui.View):
 ongoing_games = {}
 
 @bot.command()
-async def guessalbum(ctx):
+async def guess(ctx):
     user_id = sp.current_user()['id']
     playlists = sp.current_user_playlists(limit=50)['items']
     own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
