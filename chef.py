@@ -462,21 +462,21 @@ async def on_message(message):
             hint_album = reveal_characters(album_name, [])
             hint_artist = reveal_characters(hint_artist, [])
 
-        response_message = f"Attempt {attempts} **({10 - attempts} attempts left!)**: "
+        response_message = f"Attempt {attempts} *({10 - attempts} attempts left)*: "
         if album_match and artist_match:
-            response_message += f"Congratulations! You guessed both correctly in **{attempts} attempts!**"
+            response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempts!**"
             response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`"
             del ongoing_games[message.channel.id]
         else:
             if album_match:
-                response_message += "**You got the album name correct!**"
+                response_message += "\n**You got the album name correct!**"
             elif artist_match:
                 if len(artist_names) == 1:
-                    response_message += "You got the artist correct!"
+                    response_message += "\n**You got the artist correct!**"
                 else:
-                    response_message += "You got one of the artists correct!"
+                    response_message += "\n**You got one of the artists correct!**"
             else:
-                response_message += "**Both the album name and artist name are incorrect.**"
+                response_message += "\n**Both the album name and artist name are incorrect.**"
 
             # Add hints to the response
             if hint_album and hint_artist:
@@ -491,7 +491,7 @@ async def on_message(message):
                 response_message += "."
                 del ongoing_games[message.channel.id]
             else:
-                response_message += " **Try again**, or type `exit` to end the game."
+                response_message += "\nTry again, or type `exit` to end the game."
 
         await message.channel.send(response_message)
 
