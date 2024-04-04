@@ -464,7 +464,8 @@ async def on_message(message):
 
         response_message = f"Attempt {attempts}: "
         if album_match and artist_match:
-            response_message += "Congratulations! You guessed both the album and one of the artists correctly!"
+            response_message += "Congratulations! You guessed both correctly!"
+            response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`"
             del ongoing_games[message.channel.id]
         else:
             if album_match:
@@ -481,7 +482,7 @@ async def on_message(message):
 
             # End the game after too many attempts
             if attempts >= 10:
-                response_message += f"\nToo many attempts! The correct answer was `{album_name} / {artist_names[0]}`"
+                response_message += f"\nToo many attempts! The correct answer was `{album_name} / {', '.join(artist_names)}`"
                 if other_artists_count > 0:
                     response_message += f" and {other_artists_count} other artist(s)"
                 response_message += "."
