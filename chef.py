@@ -462,7 +462,7 @@ async def on_message(message):
             else:
                 hint_album = hint_artist = ''
 
-            response_message = f"Not quite right. You have {attempts} attempts."
+            response_message = f"Not quite right. You have {10 - attempts} attempts."
 
             if hint_album and hint_artist:
                 response_message += f"\nHint: `{hint_album} / {hint_artist}`"
