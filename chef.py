@@ -462,18 +462,21 @@ async def on_message(message):
             hint_album = reveal_characters(album_name, [])
             hint_artist = reveal_characters(hint_artist, [])
 
-        response_message = f"Attempt {attempts}: "
+        response_message = f"Attempt {attempts} **({10 - attempts} attempts left!)**: "
         if album_match and artist_match:
-            response_message += "Congratulations! You guessed both correctly!"
+            response_message += f"Congratulations! You guessed both correctly in **{attempts} attempts!**"
             response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`"
             del ongoing_games[message.channel.id]
         else:
             if album_match:
-                response_message += "You got the album name correct!"
+                response_message += "**You got the album name correct!**"
             elif artist_match:
-                response_message += "You got one of the artist names correct!"
+                if len(artist_names) == 1:
+                    response_message += "You got the artist correct!"
+                else:
+                    response_message += "You got one of the artists correct!"
             else:
-                response_message += "Both the album name and artist name are incorrect."
+                response_message += "**Both the album name and artist name are incorrect.**"
 
             # Add hints to the response
             if hint_album and hint_artist:
@@ -482,13 +485,13 @@ async def on_message(message):
 
             # End the game after too many attempts
             if attempts >= 10:
-                response_message += f"\nToo many attempts! The correct answer was `{album_name} / {', '.join(artist_names)}`"
+                response_message += f"\n**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`"
                 if other_artists_count > 0:
                     response_message += f" and {other_artists_count} other artist(s)"
                 response_message += "."
                 del ongoing_games[message.channel.id]
             else:
-                response_message += " Try again, or type `exit` to end the game."
+                response_message += " **Try again**, or type `exit` to end the game."
 
         await message.channel.send(response_message)
 
