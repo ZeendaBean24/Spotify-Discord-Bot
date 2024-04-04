@@ -463,7 +463,7 @@ async def on_message(message):
             await message.channel.send("Congratulations! You guessed both the album and the artist correctly!")
             del ongoing_games[message.channel.id]
         else:
-            response_message = f"{10 - attempts} attempts left: Not quite right."
+            response_message = f"**{10 - attempts} attempts left**: Not quite right."
 
             if guessed_album == album_name:
                 response_message += " **You got the album name correct!**"
