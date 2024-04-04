@@ -462,8 +462,10 @@ async def on_message(message):
             hint_album = reveal_characters(album_name, [])
             hint_artist = reveal_characters(hint_artist, [])
 
+        response_message = ""
+
         if attempts != 10:
-            response_message = f"Attempt {attempts} *({10 - attempts} attempts left)*: "
+            response_message += f"Attempt {attempts} *({10 - attempts} attempts left)*: "
         if album_match and artist_match:
             response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempts!**"
             response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`"
