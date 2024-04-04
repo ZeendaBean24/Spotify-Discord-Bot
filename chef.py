@@ -463,40 +463,32 @@ async def on_message(message):
             hint_artist = reveal_characters(hint_artist, [])
 
         response_message = ""
-
-        if attempts != 10:
-            response_message += f"Attempt {attempts} *({10 - attempts} attempts left)*: "
-        if album_match and artist_match:
-            response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempts!**"
-            response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`"
+        
+        # Start forming the response message early to avoid sending an empty message
+        if attempts == 10:
+            response_message += f"**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`."
             del ongoing_games[message.channel.id]
         else:
-            if album_match:
-                response_message += "\n**You got the album name correct!**"
-            elif artist_match:
-                if len(artist_names) == 1:
-                    response_message += "\n**You got the artist correct!**"
+            response_message += f"Attempt {attempts} *({10 - attempts} attempts left)*: "
+
+            if album_match and artist_match:
+                response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempts!**"
+                response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
+            else:
+                if album_match:
+                    response_message += "\n**You got the album name correct!**"
+                elif artist_match:
+                    response_message += "\n**You got one of the artist names correct!**"
                 else:
-                    response_message += "\n**You got one of the artists correct!**"
-            else:
-                response_message += "\n**Both the album name and artist name are incorrect.**"
+                    response_message += "\n**Both the album name and artist name are incorrect.**"
 
-            # Add hints to the response
-            if hint_album and hint_artist:
-                additional_artist_hint = f" and {other_artists_count} other artist(s)" if other_artists_count > 0 else ""
-                response_message += f"\nHint: `{hint_album} / {hint_artist}{additional_artist_hint}`"
+                # Add hints to the response
+                if hint_album and hint_artist:
+                    additional_artist_hint = f" and {other_artists_count} other artist(s)" if other_artists_count > 0 else ""
+                    response_message += f"\nHint: `{hint_album} / {hint_artist}{additional_artist_hint}`"
 
-            # End the game after too many attempts
-            if attempts >= 10:
-                response_message += f"\n**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`"
-                # if other_artists_count > 0:
-                #     response_message += f" and {other_artists_count} other artist(s)"
-                # response_message += "."
-                del ongoing_games[message.channel.id]
-            else:
                 response_message += "\nTry again, or type `exit` to end the game."
 
         await message.channel.send(response_message)
-
 
 bot.run(os.getenv("DISCORD_TOKEN"))
