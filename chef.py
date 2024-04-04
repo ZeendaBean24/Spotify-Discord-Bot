@@ -200,7 +200,7 @@ class PlaylistSelect(discord.ui.Select):
 
             await interaction.followup.send(overview_message)
 
-class PlaylistView(discord.ui.View):
+class GenrePlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_item(PlaylistSelect(playlists=playlists, placeholder="Choose a playlist"))
@@ -217,7 +217,7 @@ async def genres(ctx):
         await ctx.send("You don't have any playlists.")
         return
     
-    await ctx.send("Select one of your playlists:", view=PlaylistView(playlists=own_playlists))
+    await ctx.send("Select one of your playlists:", view=GenrePlaylistView(playlists=own_playlists))
 
 # def generate_oauth_link(client_id, redirect_uri, scope):
 #     params = {
@@ -308,7 +308,7 @@ async def randomsong(ctx):
         await ctx.send("You don't have any private playlists.")
         return
 
-    await ctx.send("Select one of your private playlists:", view=PlaylistView(playlists=own_playlists))
+    await ctx.send("Select one of your private playlists:", view=SongPlaylistView(playlists=own_playlists))
 
 class RandomSongSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
@@ -341,7 +341,7 @@ class RandomSongSelect(discord.ui.Select):
 
         await interaction.followup.send(embed=embed)
 
-class PlaylistView(discord.ui.View):
+class SongPlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_item(RandomSongSelect(playlists=playlists, placeholder="Choose a playlist"))
@@ -359,7 +359,7 @@ async def guess(ctx):
         await ctx.send("You don't have any private playlists.")
         return
 
-    await ctx.send("Select one of your private playlists:", view=PlaylistView(playlists=own_playlists))
+    await ctx.send("Select one of your private playlists:", view=GuessPlaylistView(playlists=own_playlists))
 
 class GuessGameSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
@@ -398,7 +398,7 @@ class GuessGameSelect(discord.ui.Select):
 
         await interaction.followup.send(embed=embed)
 
-class PlaylistView(discord.ui.View):
+class GuessPlaylistView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_item(GuessGameSelect(playlists=playlists, placeholder="Choose a playlist"))
@@ -438,7 +438,7 @@ async def on_message(message):
 
         # Generate hints based on the number of attempts
         def reveal_characters(name, indices):
-            return ''.join(c if i in indices or c == ' ' else '_' for i, c in enumerate(name))
+            return ' '.join('\_' if i not in indices and c != ' ' else c for i, c in enumerate(name))
 
         def get_first_indices(name):
             return [0] + [i+1 for i, c in enumerate(name[:-1]) if c == ' ']
