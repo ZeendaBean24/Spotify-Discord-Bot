@@ -378,15 +378,14 @@ class GuessGameSelect(discord.ui.Select):
 
         # Select a random song
         selected_track = random.choice(tracks)['track']
-        song_name = selected_track['name']
         album_name = selected_track['album']['name']
         album_cover_url = selected_track['album']['images'][0]['url']
-        artists = ', '.join([artist['name'] for artist in selected_track['artists']])
+        artist_names = [artist['name'] for artist in selected_track['artists']]
 
         # Store game data
         ongoing_games[interaction.channel_id] = {
             "album_name": album_name.lower(),
-            "artist_name": artists.lower(),
+            "artist_names": [artist.lower() for artist in artist_names],
             "attempts": 0
         }
 
