@@ -438,7 +438,7 @@ async def on_message(message):
 
         # Generate hints based on the number of attempts
         def reveal_characters(name, indices):
-            return ' '.join('\_' if i not in indices and c != ' ' else c for i, c in enumerate(name))
+            return ' '.join('_' if i not in indices and c != ' ' else c for i, c in enumerate(name))
 
         def get_first_indices(name):
             return [0] + [i+1 for i, c in enumerate(name[:-1]) if c == ' ']
@@ -486,9 +486,9 @@ async def on_message(message):
             # End the game after too many attempts
             if attempts >= 10:
                 response_message += f"\n**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`"
-                if other_artists_count > 0:
-                    response_message += f" and {other_artists_count} other artist(s)"
-                response_message += "."
+                # if other_artists_count > 0:
+                #     response_message += f" and {other_artists_count} other artist(s)"
+                # response_message += "."
                 del ongoing_games[message.channel.id]
             else:
                 response_message += "\nTry again, or type `exit` to end the game."
