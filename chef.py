@@ -427,12 +427,15 @@ async def on_message(message):
             del ongoing_games[message.channel.id]
             return
 
-        album_name, artist_name = game_data['album_name'], game_data['artist_name']
+        album_name, artist_names = game_data['album_name'], game_data['artist_names']
         guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]  # Safely extract guesses
 
         # Increment the number of attempts
         game_data['attempts'] += 1
         attempts = game_data['attempts']
+
+        album_match = guessed_album == album_name.lower()
+        artist_match = any(guessed_artist == artist.lower() for artist in artist_names)
 
         # Generate hints based on the number of attempts
         def reveal_characters(name, indices):
@@ -444,44 +447,50 @@ async def on_message(message):
         def get_last_indices(name):
             return [i-1 for i, c in enumerate(name[1:], 1) if c == ' '] + [len(name)-1]
 
-        hint_album = hint_artist = ''
+        hint_artist = artist_names[0]  # Use the first artist for hints
+        other_artists_count = len(artist_names) - 1
+        hint_album = ''
         if attempts >= 9:
             hint_album = reveal_characters(album_name, get_first_indices(album_name) + get_last_indices(album_name))
-            hint_artist = reveal_characters(artist_name, get_first_indices(artist_name) + get_last_indices(artist_name))
+            hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist) + get_last_indices(hint_artist))
         elif attempts >= 7:
             hint_album = reveal_characters(album_name, get_first_indices(album_name))
-            hint_artist = reveal_characters(artist_name, get_first_indices(artist_name))
+            hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist))
         elif attempts >= 5:
             hint_album = reveal_characters(album_name, [0])
-            hint_artist = reveal_characters(artist_name, [0])
+            hint_artist = reveal_characters(hint_artist, [0])
         elif attempts >= 3:
             hint_album = reveal_characters(album_name, [])
-            hint_artist = reveal_characters(artist_name, [])
+            hint_artist = reveal_characters(hint_artist, [])
 
-        # Checking correctness
-        if guessed_album == album_name and guessed_artist == artist_name:
-            await message.channel.send("Congratulations! You guessed both the album and the artist correctly!")
+        response_message = f"Attempt {attempts}: "
+        if album_match and artist_match:
+            response_message += "Congratulations! You guessed both the album and one of the artists correctly!"
             del ongoing_games[message.channel.id]
         else:
-            response_message = f"**{10 - attempts} attempts left**: Not quite right."
-
-            if guessed_album == album_name:
-                response_message += " **You got the album name correct!**"
-            if guessed_artist == artist_name:
-                response_message += " **You got the artist name correct!**"
+            if album_match:
+                response_message += "You got the album name correct!"
+            elif artist_match:
+                response_message += "You got one of the artist names correct!"
+            else:
+                response_message += "Both the album name and artist name are incorrect."
 
             # Add hints to the response
             if hint_album and hint_artist:
-                response_message += f"\nHint: `{hint_album} / {hint_artist}`"
+                additional_artist_hint = f" and {other_artists_count} other artist(s)" if other_artists_count > 0 else ""
+                response_message += f"\nHint: `{hint_album} / {hint_artist}{additional_artist_hint}`"
 
             # End the game after too many attempts
             if attempts >= 10:
-                response_message += f"\nToo many attempts! The correct answer was `{album_name} / {artist_name}`."
+                response_message += f"\nToo many attempts! The correct answer was `{album_name} / {artist_names[0]}`"
+                if other_artists_count > 0:
+                    response_message += f" and {other_artists_count} other artist(s)"
+                response_message += "."
                 del ongoing_games[message.channel.id]
             else:
                 response_message += " Try again, or type `exit` to end the game."
 
-            await message.channel.send(response_message)
+        await message.channel.send(response_message)
 
 
 bot.run(os.getenv("DISCORD_TOKEN"))
