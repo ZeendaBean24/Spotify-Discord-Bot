@@ -521,6 +521,8 @@ async def on_message(message):
                     await voice_client.disconnect()
                 await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
             else:
+                if voice_client and voice_client.is_connected():
+                    await voice_client.disconnect()
                 correct_artist = artist_names[0]
                 await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {correct_artist}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
 
