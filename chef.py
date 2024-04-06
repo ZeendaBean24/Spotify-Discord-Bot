@@ -539,22 +539,20 @@ async def preview(ctx):
 
         if ctx.author.voice and ctx.author.voice.channel:
             channel = ctx.author.voice.channel
-            voice_client = await channel.connect()
+            voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+
+            if voice_client and voice_client.is_connected():
+                await voice_client.move_to(channel)
+            else:
+                voice_client = await channel.connect()
 
             # Play a 10-second snippet
             ffmpeg_options = {
                 'before_options': '-ss 00:00:00',  # start at the beginning
                 'options': '-t 10'  # play for 10 seconds
             }
-            voice_client.play(discord.FFmpegPCMAudio(preview_url, **ffmpeg_options))
-
-            def after_playing(err):
-                if voice_client.is_connected():
-                    bot.loop.create_task(voice_client.disconnect())
-
-            voice_client.source = discord.PCMVolumeTransformer(voice_client.source)
-            voice_client.source.volume = 0.5
-            voice_client.after = after_playing
+            audio_source = discord.FFmpegPCMAudio(preview_url, **ffmpeg_options)
+            voice_client.play(audio_source, after=lambda e: bot.loop.create_task(voice_client.disconnect()))
 
             await interaction.followup.send(f"Playing 10-second preview: {selected_track['name']} by {', '.join([artist['name'] for artist in selected_track['artists']])}")
         else:
