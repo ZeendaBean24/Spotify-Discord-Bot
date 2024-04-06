@@ -7,7 +7,17 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import asyncio
 import locale
+
 # import urllib.parse
+
+# Load the Opus library
+opus_path = '/opt/homebrew/lib/libopus.dylib'  # apk add --no-cache opus-dev
+discord.opus.load_opus(opus_path)
+
+if discord.opus.is_loaded():
+    print("Opus successfully loaded.")
+else:
+    print("Failed to load Opus.")
 
 # Set the locale to the user's default setting (for number formatting)
 locale.setlocale(locale.LC_ALL, '')
@@ -456,7 +466,7 @@ async def on_message(message):
             hint_album = reveal_characters(album_name, get_first_indices(album_name))
             hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist))
         elif attempts >= 5:
-            hint_album = reveal_characters(album_name, [0])
+            hint_album = reveal_characters(album_name, [0]) 
             hint_artist = reveal_characters(hint_artist, [0])
         elif attempts >= 3:
             hint_album = reveal_characters(album_name, [])
@@ -478,9 +488,12 @@ async def on_message(message):
                 if album_match:
                     response_message += "\n**You got the album name correct!**"
                 elif artist_match:
-                    response_message += "\n**You got one of the artist names correct!**"
+                    if len(artist_names) == 1:
+                        response_message += "\n**You got the artist correct!**"
+                    else:
+                        response_message += "\n**You got one of the artists correct!**"
                 else:
-                    response_message += "\n**Both the album name and artist name are incorrect.**"
+                    response_message += "\n**Both the album name and artist are incorrect.**"
 
                 # Add hints to the response
                 if hint_album and hint_artist:
@@ -490,5 +503,43 @@ async def on_message(message):
                 response_message += "\nTry again, or type `exit` to end the game."
 
         await message.channel.send(response_message)
+
+@bot.command()
+async def preview(ctx):
+    user_id = sp.current_user()['id']
+    playlists = sp.current_user_playlists(limit=50)['items']
+    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+
+    if not own_playlists:
+        await ctx.send("You don't have any private playlists.")
+        return
+
+    # Just an example: selecting the first playlist and the first track for simplicity
+    playlist_id = own_playlists[0]['id']
+    tracks = await fetch_all_playlist_tracks(playlist_id)
+    
+    if not tracks:
+        await ctx.send("The selected playlist is empty.")
+        return
+
+    selected_track = tracks[0]['track']
+    preview_url = selected_track['preview_url']
+
+    if preview_url is None:
+        await ctx.send("Preview not available for the selected track.")
+        return
+
+    # Join the user's voice channel
+    if ctx.author.voice and ctx.author.voice.channel:
+        channel = ctx.author.voice.channel
+        voice_client = await channel.connect()
+
+        # Play the preview
+        voice_client.play(discord.FFmpegPCMAudio(preview_url))
+
+        await ctx.send(f"Playing preview: {selected_track['name']} by {''.join([artist['name'] for artist in selected_track['artists']])}")
+    else:
+        await ctx.send("You are not connected to a voice channel.")
+
 
 bot.run(os.getenv("DISCORD_TOKEN"))
