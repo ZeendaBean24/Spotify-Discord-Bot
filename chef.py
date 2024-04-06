@@ -504,6 +504,9 @@ async def on_message(message):
 
         await message.channel.send(response_message)
 
+import discord
+from discord.ext import tasks
+
 @bot.command()
 async def preview(ctx):
     user_id = sp.current_user()['id']
@@ -514,32 +517,58 @@ async def preview(ctx):
         await ctx.send("You don't have any private playlists.")
         return
 
-    # Just an example: selecting the first playlist and the first track for simplicity
-    playlist_id = own_playlists[0]['id']
-    tracks = await fetch_all_playlist_tracks(playlist_id)
-    
-    if not tracks:
-        await ctx.send("The selected playlist is empty.")
-        return
+    # Send a message for the user to select a playlist
+    def get_playlist_options(playlists):
+        return [discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists]
 
-    selected_track = tracks[0]['track']
-    preview_url = selected_track['preview_url']
+    select = discord.ui.Select(placeholder="Choose your playlist", options=get_playlist_options(own_playlists))
+    view = discord.ui.View()
+    view.add_item(select)
 
-    if preview_url is None:
-        await ctx.send("Preview not available for the selected track.")
-        return
+    await ctx.send("Select one of your playlists:", view=view)
 
-    # Join the user's voice channel
-    if ctx.author.voice and ctx.author.voice.channel:
-        channel = ctx.author.voice.channel
-        voice_client = await channel.connect()
+    # Closure to capture the context
+    async def play_snippet(interaction, playlist_id):
+        tracks = await fetch_all_playlist_tracks(playlist_id)
 
-        # Play the preview
-        voice_client.play(discord.FFmpegPCMAudio(preview_url))
+        if not tracks:
+            await interaction.followup.send("The selected playlist is empty.")
+            return
 
-        await ctx.send(f"Playing preview: {selected_track['name']} by {''.join([artist['name'] for artist in selected_track['artists']])}")
-    else:
-        await ctx.send("You are not connected to a voice channel.")
+        selected_track = random.choice(tracks)['track']
+        preview_url = selected_track['preview_url']
 
+        if preview_url is None:
+            await interaction.followup.send("Preview not available for the selected track.")
+            return
+
+        if ctx.author.voice and ctx.author.voice.channel:
+            channel = ctx.author.voice.channel
+            voice_client = await channel.connect()
+
+            # Play a 10-second snippet
+            ffmpeg_options = {
+                'before_options': '-ss 00:00:00',  # start at the beginning
+                'options': '-t 10'  # play for 10 seconds
+            }
+            voice_client.play(discord.FFmpegPCMAudio(preview_url, **ffmpeg_options))
+
+            def after_playing(err):
+                if voice_client.is_connected():
+                    asyncio.run_coroutine_threadsafe(voice_client.disconnect(), bot.loop)
+
+            voice_client.source = discord.PCMVolumeTransformer(voice_client.source)
+            voice_client.source.volume = 0.5
+            voice_client.after = after_playing
+
+            await interaction.followup.send(f"Playing 10-second preview: {selected_track['name']} by {', '.join([artist['name'] for artist in selected_track['artists']])}")
+        else:
+            await interaction.followup.send("You are not connected to a voice channel.")
+
+    # Handle the playlist selection
+    async def select_callback(interaction):
+        await play_snippet(interaction, select.values[0])
+
+    select.callback = select_callback
 
 bot.run(os.getenv("DISCORD_TOKEN"))
