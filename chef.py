@@ -61,18 +61,28 @@ async def luckynumber(ctx):
 @bot.command()
 async def cmds(ctx):
     commands_list = [
+        '\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*',
+        '',
         '**!cmds - Lists all available commands**',
+        '**!info - Provides info about the bot**',
+        '',
+        '\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\* **Basic Commands** \*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*',
+        '',
         '!greet - Greet you with a random message',
         '!luckynumber - Tells you a random lucky number',
-        '**!info - Provides info about the bot**',
+        '',
+        '\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\* **Music Commands** \*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*',
+        '',
         '**!recent - Displays the most recent Spotify track played**',
         '**!genres - Shows the top genres in a Spotify playlist**',
         '**!popularity - Analyzes the popularity of a Spotify playlist**',
         '**!randomsong - Picks a random song from a Spotify playlist**',
         '**!guess - Guessing game based on an album cover**',
-        '**!preview - Guessing game based on a song audio snippet (Voice call required)**'
+        '**!preview - Guessing game based on a song audio snippet (Voice call required)**',
+        '',
+        '\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*',
     ]
-    await ctx.send('**You can use the following commands**: \n' + '\n'.join(commands_list))
+    await ctx.send('\n'.join(commands_list))
 
 @bot.command()
 async def info(ctx):
