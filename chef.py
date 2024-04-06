@@ -458,7 +458,8 @@ async def preview(ctx):
                 voice_client = await channel.connect()
 
             audio_source = discord.FFmpegPCMAudio(preview_url)
-            voice_client.play(audio_source, after=lambda e: bot.loop.create_task(voice_client.disconnect()))
+            volume_adjusted_source = discord.PCMVolumeTransformer(audio_source, volume=0.25)  # 25% volume
+            voice_client.play(volume_adjusted_source, after=lambda e: bot.loop.create_task(voice_client.disconnect()))
 
             start_time = time.time()
             ongoing_game[ctx.channel.id] = {
