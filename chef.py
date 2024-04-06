@@ -517,18 +517,13 @@ async def preview(ctx):
         await ctx.send("You don't have any private playlists.")
         return
 
-    # Send a message for the user to select a playlist
-    def get_playlist_options(playlists):
-        return [discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists]
+    select = discord.ui.Select(placeholder="Choose your playlist",
+                               options=[discord.SelectOption(label=playlist['name'], value=playlist['id'])
+                                        for playlist in own_playlists])
 
-    select = discord.ui.Select(placeholder="Choose your playlist", options=get_playlist_options(own_playlists))
-    view = discord.ui.View()
-    view.add_item(select)
-
-    await ctx.send("Select one of your playlists:", view=view)
-
-    # Closure to capture the context
-    async def play_snippet(interaction, playlist_id):
+    async def select_callback(interaction):
+        await interaction.response.defer()
+        playlist_id = select.values[0]
         tracks = await fetch_all_playlist_tracks(playlist_id)
 
         if not tracks:
@@ -555,7 +550,7 @@ async def preview(ctx):
 
             def after_playing(err):
                 if voice_client.is_connected():
-                    asyncio.run_coroutine_threadsafe(voice_client.disconnect(), bot.loop)
+                    bot.loop.create_task(voice_client.disconnect())
 
             voice_client.source = discord.PCMVolumeTransformer(voice_client.source)
             voice_client.source.volume = 0.5
@@ -565,10 +560,10 @@ async def preview(ctx):
         else:
             await interaction.followup.send("You are not connected to a voice channel.")
 
-    # Handle the playlist selection
-    async def select_callback(interaction):
-        await play_snippet(interaction, select.values[0])
-
     select.callback = select_callback
+
+    view = discord.ui.View()
+    view.add_item(select)
+    await ctx.send("Select one of your playlists:", view=view)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
