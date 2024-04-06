@@ -452,12 +452,16 @@ async def preview(ctx):
             channel = ctx.author.voice.channel
             voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
 
+            ffmpeg_options = {
+                'options': '-t 30'  # Play for 30 seconds
+            }
+
             if voice_client and voice_client.is_connected():
                 await voice_client.move_to(channel)
             else:
                 voice_client = await channel.connect()
 
-            audio_source = discord.FFmpegPCMAudio(preview_url)
+            audio_source = discord.FFmpegPCMAudio(preview_url, **ffmpeg_options)
             volume_adjusted_source = discord.PCMVolumeTransformer(audio_source, volume=0.25)  # 25% volume
             voice_client.play(volume_adjusted_source, after=lambda e: bot.loop.create_task(voice_client.disconnect()))
 
