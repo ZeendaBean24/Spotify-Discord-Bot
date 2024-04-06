@@ -7,6 +7,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import asyncio
 import locale
+import time
 
 # import urllib.parse
 
@@ -504,8 +505,8 @@ async def on_message(message):
 
         await message.channel.send(response_message)
 
-import discord
-from discord.ext import tasks
+# Global dictionary to track ongoing game by channel
+ongoing_game = {}
 
 @bot.command()
 async def preview(ctx):
@@ -546,15 +547,17 @@ async def preview(ctx):
             else:
                 voice_client = await channel.connect()
 
-            # Play a 10-second snippet
-            ffmpeg_options = {
-                'before_options': '-ss 00:00:00',  # start at the beginning
-                'options': '-t 10'  # play for 10 seconds
-            }
-            audio_source = discord.FFmpegPCMAudio(preview_url, **ffmpeg_options)
+            audio_source = discord.FFmpegPCMAudio(preview_url)
             voice_client.play(audio_source, after=lambda e: bot.loop.create_task(voice_client.disconnect()))
 
-            await interaction.followup.send(f"Playing 10-second preview: {selected_track['name']} by {', '.join([artist['name'] for artist in selected_track['artists']])}")
+            start_time = time.time()
+            ongoing_game[ctx.channel.id] = {
+                "track_name": selected_track['name'].lower(),
+                "artist_names": [artist['name'].lower() for artist in selected_track['artists']],
+                "start_time": start_time
+            }
+
+            await interaction.followup.send("Guess the song and artist! Type your answer in the format `[track name] / [artist name]`.")
         else:
             await interaction.followup.send("You are not connected to a voice channel.")
 
@@ -563,5 +566,31 @@ async def preview(ctx):
     view = discord.ui.View()
     view.add_item(select)
     await ctx.send("Select one of your playlists:", view=view)
+
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+
+    if message.author == bot.user or message.content.startswith(bot.command_prefix):
+        if message.channel.id in ongoing_game:
+            await message.channel.send("Game ended because a new command was entered.")
+            del ongoing_game[message.channel.id]
+        return
+
+    if message.channel.id in ongoing_game:
+        game_data = ongoing_game.pop(message.channel.id)
+        guess = message.content.lower().strip()
+        track_name, artist_names = game_data['track_name'], game_data['artist_names']
+        guessed_track, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
+
+        end_time = time.time()
+        time_taken = end_time - game_data['start_time']
+        time_taken_ms = int((time_taken % 1) * 1000)
+
+        if guessed_track == track_name and guessed_artist in artist_names:
+            await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+        else:
+            correct_artist = artist_names[0]  # Assuming the first artist as the correct one for simplicity
+            await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {correct_artist}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
