@@ -61,14 +61,16 @@ async def luckynumber(ctx):
 @bot.command()
 async def cmds(ctx):
     commands_list = [
-        '!test - Test command with an embedded message',
+        '**!cmds - Lists all available commands**',
         '!greet - Greet you with a random message',
         '!luckynumber - Tells you a random lucky number',
-        '**!cmds - Lists all available commands**',
         '**!info - Provides info about the bot**',
         '**!recent - Displays the most recent Spotify track played**',
         '**!genres - Shows the top genres in a Spotify playlist**',
         '**!popularity - Analyzes the popularity of a Spotify playlist**'
+        '**!randomsong - Picks a random song from a Spotify playlist**',
+        '**!guess - Guessing game based on an album cover**',
+        '**!preview - Guessing game based on a song audio snippet (Voice call required)**'
     ]
     await ctx.send('**You can use the following commands**: \n' + '\n'.join(commands_list))
 
