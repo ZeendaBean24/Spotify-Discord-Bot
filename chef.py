@@ -67,7 +67,7 @@ async def cmds(ctx):
         '**!info - Provides info about the bot**',
         '**!recent - Displays the most recent Spotify track played**',
         '**!genres - Shows the top genres in a Spotify playlist**',
-        '**!popularity - Analyzes the popularity of a Spotify playlist**'
+        '**!popularity - Analyzes the popularity of a Spotify playlist**',
         '**!randomsong - Picks a random song from a Spotify playlist**',
         '**!guess - Guessing game based on an album cover**',
         '**!preview - Guessing game based on a song audio snippet (Voice call required)**'
