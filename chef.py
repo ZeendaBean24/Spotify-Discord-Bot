@@ -490,14 +490,18 @@ async def on_message(message):
     game_data = ongoing_game.get(message.channel.id)
 
     if game_data:
-        # Common logic for ending the game if a new command is entered
+        voice_client = discord.utils.get(bot.voice_clients, guild=message.guild)
+
         if message.content.startswith('!'):
+            if voice_client and voice_client.is_connected():
+                await voice_client.disconnect()
             await message.channel.send("Game ended because a new command was entered.")
             ongoing_game.pop(message.channel.id, None)
             return
 
-        # Handling for the preview guessing game
-        if game_data['game_type'] == 'preview':
+        game_type = game_data.get('game_type')
+        
+        if game_type == 'preview':
             guess = message.content.lower().strip()
             track_name, artist_names = game_data['track_name'], game_data['artist_names']
             guessed_track, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
@@ -509,13 +513,15 @@ async def on_message(message):
             ongoing_game.pop(message.channel.id, None)  # End the game after one guess
 
             if guessed_track == track_name and guessed_artist in artist_names:
+                if voice_client and voice_client.is_connected():
+                    await voice_client.disconnect()
                 await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
             else:
-                correct_artist = artist_names[0]  # Assuming the first artist as the correct one
+                correct_artist = artist_names[0]
                 await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {correct_artist}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
 
         # Handling for the album guessing game
-        elif game_data['game_type'] == 'guess':
+        elif game_type == 'guess':
             guess = message.content.lower().strip()
             if guess == 'exit':
                 await message.channel.send("Game ended. Thanks for playing!")
