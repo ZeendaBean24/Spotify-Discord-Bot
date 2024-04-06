@@ -571,26 +571,30 @@ async def preview(ctx):
 async def on_message(message):
     await bot.process_commands(message)
 
-    if message.author == bot.user or message.content.startswith(bot.command_prefix):
-        if message.channel.id in ongoing_game:
-            await message.channel.send("Game ended because a new command was entered.")
-            del ongoing_game[message.channel.id]
+    # Ignore bot's own messages
+    if message.author == bot.user:
         return
 
-    if message.channel.id in ongoing_game:
-        game_data = ongoing_game.pop(message.channel.id)
-        guess = message.content.lower().strip()
-        track_name, artist_names = game_data['track_name'], game_data['artist_names']
-        guessed_track, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
+    # Check if there's an ongoing game and the message is not a command
+    if message.channel.id in ongoing_game and not message.content.startswith(bot.command_prefix):
+        game_data = ongoing_game.pop(message.channel.id, None)
+        if game_data:
+            guess = message.content.lower().strip()
+            track_name, artist_names = game_data['track_name'], game_data['artist_names']
+            guessed_track, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
 
-        end_time = time.time()
-        time_taken = end_time - game_data['start_time']
-        time_taken_ms = int((time_taken % 1) * 1000)
+            end_time = time.time()
+            time_taken = end_time - game_data['start_time']
+            time_taken_ms = int((time_taken % 1) * 1000)
 
-        if guessed_track == track_name and guessed_artist in artist_names:
-            await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
-        else:
-            correct_artist = artist_names[0]  # Assuming the first artist as the correct one for simplicity
-            await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {correct_artist}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+            if guessed_track == track_name and guessed_artist in artist_names:
+                await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+            else:
+                correct_artist = artist_names[0]  # Assuming the first artist as the correct one for simplicity
+                await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {correct_artist}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+    elif message.content.startswith(bot.command_prefix):
+        if message.channel.id in ongoing_game:
+            await message.channel.send("Game ended because a new command was entered.")
+            ongoing_game.pop(message.channel.id, None)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
