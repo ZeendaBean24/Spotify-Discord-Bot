@@ -414,96 +414,96 @@ class GuessPlaylistView(discord.ui.View):
         super().__init__(*args, **kwargs)
         self.add_item(GuessGameSelect(playlists=playlists, placeholder="Choose a playlist"))
 
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
+# @bot.event
+# async def on_message(message):
+#     if message.author == bot.user:
+#         return
 
-    # Ensure this doesn't block other commands
-    await bot.process_commands(message)
+#     # Ensure this doesn't block other commands
+#     await bot.process_commands(message)
 
-    # Check if there's an ongoing game in this channel
-    game_data = ongoing_games.get(message.channel.id)
-    if game_data:
-        # If the message is a command, end the game
-        if message.content.startswith('!'):
-            await message.channel.send("Game ended because a new command was entered.")
-            del ongoing_games[message.channel.id]
-            return
+#     # Check if there's an ongoing game in this channel
+#     game_data = ongoing_games.get(message.channel.id)
+#     if game_data:
+#         # If the message is a command, end the game
+#         if message.content.startswith('!'):
+#             await message.channel.send("Game ended because a new command was entered.")
+#             del ongoing_games[message.channel.id]
+#             return
 
-        guess = message.content.lower().strip()
-        if guess == 'exit':
-            await message.channel.send("Game ended. Thanks for playing!")
-            del ongoing_games[message.channel.id]
-            return
+#         guess = message.content.lower().strip()
+#         if guess == 'exit':
+#             await message.channel.send("Game ended. Thanks for playing!")
+#             del ongoing_games[message.channel.id]
+#             return
 
-        album_name, artist_names = game_data['album_name'], game_data['artist_names']
-        guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]  # Safely extract guesses
+#         album_name, artist_names = game_data['album_name'], game_data['artist_names']
+#         guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]  # Safely extract guesses
 
-        # Increment the number of attempts
-        game_data['attempts'] += 1
-        attempts = game_data['attempts']
+#         # Increment the number of attempts
+#         game_data['attempts'] += 1
+#         attempts = game_data['attempts']
 
-        album_match = guessed_album == album_name.lower()
-        artist_match = any(guessed_artist == artist.lower() for artist in artist_names)
+#         album_match = guessed_album == album_name.lower()
+#         artist_match = any(guessed_artist == artist.lower() for artist in artist_names)
 
-        # Generate hints based on the number of attempts
-        def reveal_characters(name, indices):
-            return ' '.join('_' if i not in indices and c != ' ' else c for i, c in enumerate(name))
+#         # Generate hints based on the number of attempts
+#         def reveal_characters(name, indices):
+#             return ' '.join('_' if i not in indices and c != ' ' else c for i, c in enumerate(name))
 
-        def get_first_indices(name):
-            return [0] + [i+1 for i, c in enumerate(name[:-1]) if c == ' ']
+#         def get_first_indices(name):
+#             return [0] + [i+1 for i, c in enumerate(name[:-1]) if c == ' ']
 
-        def get_last_indices(name):
-            return [i-1 for i, c in enumerate(name[1:], 1) if c == ' '] + [len(name)-1]
+#         def get_last_indices(name):
+#             return [i-1 for i, c in enumerate(name[1:], 1) if c == ' '] + [len(name)-1]
 
-        hint_artist = artist_names[0]  # Use the first artist for hints
-        other_artists_count = len(artist_names) - 1
-        hint_album = ''
-        if attempts >= 9:
-            hint_album = reveal_characters(album_name, get_first_indices(album_name) + get_last_indices(album_name))
-            hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist) + get_last_indices(hint_artist))
-        elif attempts >= 7:
-            hint_album = reveal_characters(album_name, get_first_indices(album_name))
-            hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist))
-        elif attempts >= 5:
-            hint_album = reveal_characters(album_name, [0]) 
-            hint_artist = reveal_characters(hint_artist, [0])
-        elif attempts >= 3:
-            hint_album = reveal_characters(album_name, [])
-            hint_artist = reveal_characters(hint_artist, [])
+#         hint_artist = artist_names[0]  # Use the first artist for hints
+#         other_artists_count = len(artist_names) - 1
+#         hint_album = ''
+#         if attempts >= 9:
+#             hint_album = reveal_characters(album_name, get_first_indices(album_name) + get_last_indices(album_name))
+#             hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist) + get_last_indices(hint_artist))
+#         elif attempts >= 7:
+#             hint_album = reveal_characters(album_name, get_first_indices(album_name))
+#             hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist))
+#         elif attempts >= 5:
+#             hint_album = reveal_characters(album_name, [0]) 
+#             hint_artist = reveal_characters(hint_artist, [0])
+#         elif attempts >= 3:
+#             hint_album = reveal_characters(album_name, [])
+#             hint_artist = reveal_characters(hint_artist, [])
 
-        response_message = ""
+#         response_message = ""
 
-        # Start forming the response message early to avoid sending an empty message
-        if attempts == 10:
-            response_message += f"**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`."
-            del ongoing_games[message.channel.id]
-        else:
-            response_message += f"Attempt {attempts} *({10 - attempts} attempt(s) left)*: "
+#         # Start forming the response message early to avoid sending an empty message
+#         if attempts == 10:
+#             response_message += f"**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`."
+#             del ongoing_games[message.channel.id]
+#         else:
+#             response_message += f"Attempt {attempts} *({10 - attempts} attempt(s) left)*: "
 
-            if album_match and artist_match:
-                response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempt(s)!**"
-                response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
-            else:
-                if album_match:
-                    response_message += "\n**You got the album name correct!**"
-                elif artist_match:
-                    if len(artist_names) == 1:
-                        response_message += "\n**You got the artist correct!**"
-                    else:
-                        response_message += "\n**You got one of the artists correct!**"
-                else:
-                    response_message += "\n**Both the album name and artist are incorrect.**"
+#             if album_match and artist_match:
+#                 response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempt(s)!**"
+#                 response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
+#             else:
+#                 if album_match:
+#                     response_message += "\n**You got the album name correct!**"
+#                 elif artist_match:
+#                     if len(artist_names) == 1:
+#                         response_message += "\n**You got the artist correct!**"
+#                     else:
+#                         response_message += "\n**You got one of the artists correct!**"
+#                 else:
+#                     response_message += "\n**Both the album name and artist are incorrect.**"
 
-                # Add hints to the response
-                if hint_album and hint_artist:
-                    additional_artist_hint = f" and {other_artists_count} other artist(s)" if other_artists_count > 0 else ""
-                    response_message += f"\nHint: `{hint_album} / {hint_artist}{additional_artist_hint}`"
+#                 # Add hints to the response
+#                 if hint_album and hint_artist:
+#                     additional_artist_hint = f" and {other_artists_count} other artist(s)" if other_artists_count > 0 else ""
+#                     response_message += f"\nHint: `{hint_album} / {hint_artist}{additional_artist_hint}`"
 
-                response_message += "\nTry again, or type `exit` to end the game."
+#                 response_message += "\nTry again, or type `exit` to end the game."
 
-        await message.channel.send(response_message)
+#         await message.channel.send(response_message)
 
 # Global dictionary to track ongoing game by channel
 ongoing_game = {}
@@ -567,18 +567,55 @@ async def preview(ctx):
     view.add_item(select)
     await ctx.send("Select one of your playlists:", view=view)
 
+# @bot.event
+# async def on_message(message):
+#     await bot.process_commands(message)
+
+#     # Ignore bot's own messages
+#     if message.author == bot.user:
+#         return
+
+#     # Check if there's an ongoing game and the message is not a command
+#     if message.channel.id in ongoing_game and not message.content.startswith(bot.command_prefix):
+#         game_data = ongoing_game.pop(message.channel.id, None)
+#         if game_data:
+#             guess = message.content.lower().strip()
+#             track_name, artist_names = game_data['track_name'], game_data['artist_names']
+#             guessed_track, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
+
+#             end_time = time.time()
+#             time_taken = end_time - game_data['start_time']
+#             time_taken_ms = int((time_taken % 1) * 1000)
+
+#             if guessed_track == track_name and guessed_artist in artist_names:
+#                 await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+#             else:
+#                 correct_artist = artist_names[0]  # Assuming the first artist as the correct one for simplicity
+#                 await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {correct_artist}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+#     elif message.content.startswith(bot.command_prefix):
+#         if message.channel.id in ongoing_game:
+#             await message.channel.send("Game ended because a new command was entered.")
+#             ongoing_game.pop(message.channel.id, None)
+
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
 
-    # Ignore bot's own messages
     if message.author == bot.user:
         return
 
-    # Check if there's an ongoing game and the message is not a command
-    if message.channel.id in ongoing_game and not message.content.startswith(bot.command_prefix):
-        game_data = ongoing_game.pop(message.channel.id, None)
-        if game_data:
+    # Check if there's an ongoing game in this channel
+    game_data = ongoing_game.get(message.channel.id)
+
+    if game_data:
+        # Common logic for ending the game if a new command is entered
+        if message.content.startswith('!'):
+            await message.channel.send("Game ended because a new command was entered.")
+            ongoing_game.pop(message.channel.id, None)
+            return
+
+        # Handling for the preview guessing game
+        if game_data['game_type'] == 'preview':
             guess = message.content.lower().strip()
             track_name, artist_names = game_data['track_name'], game_data['artist_names']
             guessed_track, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
@@ -587,14 +624,92 @@ async def on_message(message):
             time_taken = end_time - game_data['start_time']
             time_taken_ms = int((time_taken % 1) * 1000)
 
+            ongoing_game.pop(message.channel.id, None)  # End the game after one guess
+
             if guessed_track == track_name and guessed_artist in artist_names:
                 await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
             else:
-                correct_artist = artist_names[0]  # Assuming the first artist as the correct one for simplicity
+                correct_artist = artist_names[0]  # Assuming the first artist as the correct one
                 await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {correct_artist}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
-    elif message.content.startswith(bot.command_prefix):
-        if message.channel.id in ongoing_game:
-            await message.channel.send("Game ended because a new command was entered.")
-            ongoing_game.pop(message.channel.id, None)
+
+        # Handling for the album guessing game
+        elif game_data['game_type'] == 'guess':
+            guess = message.content.lower().strip()
+            if guess == 'exit':
+                await message.channel.send("Game ended. Thanks for playing!")
+                ongoing_game.pop(message.channel.id, None)
+                return
+
+            album_name, artist_names = game_data['album_name'], game_data['artist_names']
+            guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
+
+            # Logic for checking guesses, providing hints, etc.
+            # Update this part with the specific logic for the album guessing game
+            # Similar to how you have it in your current `on_message` handling for the `guess` game
+
+            # Increment the number of attempts
+            game_data['attempts'] += 1
+            attempts = game_data['attempts']
+
+            album_match = guessed_album == album_name.lower()
+            artist_match = any(guessed_artist == artist.lower() for artist in artist_names)
+
+            # Generate hints based on the number of attempts
+            def reveal_characters(name, indices):
+                return ' '.join('_' if i not in indices and c != ' ' else c for i, c in enumerate(name))
+
+            def get_first_indices(name):
+                return [0] + [i+1 for i, c in enumerate(name[:-1]) if c == ' ']
+
+            def get_last_indices(name):
+                return [i-1 for i, c in enumerate(name[1:], 1) if c == ' '] + [len(name)-1]
+
+            hint_artist = artist_names[0]  # Use the first artist for hints
+            other_artists_count = len(artist_names) - 1
+            hint_album = ''
+            if attempts >= 9:
+                hint_album = reveal_characters(album_name, get_first_indices(album_name) + get_last_indices(album_name))
+                hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist) + get_last_indices(hint_artist))
+            elif attempts >= 7:
+                hint_album = reveal_characters(album_name, get_first_indices(album_name))
+                hint_artist = reveal_characters(hint_artist, get_first_indices(hint_artist))
+            elif attempts >= 5:
+                hint_album = reveal_characters(album_name, [0]) 
+                hint_artist = reveal_characters(hint_artist, [0])
+            elif attempts >= 3:
+                hint_album = reveal_characters(album_name, [])
+                hint_artist = reveal_characters(hint_artist, [])
+
+            response_message = ""
+
+            # Start forming the response message early to avoid sending an empty message
+            if attempts == 10:
+                response_message += f"**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`."
+                del ongoing_games[message.channel.id]
+            else:
+                response_message += f"Attempt {attempts} *({10 - attempts} attempt(s) left)*: "
+
+                if album_match and artist_match:
+                    response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempt(s)!**"
+                    response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
+                else:
+                    if album_match:
+                        response_message += "\n**You got the album name correct!**"
+                    elif artist_match:
+                        if len(artist_names) == 1:
+                            response_message += "\n**You got the artist correct!**"
+                        else:
+                            response_message += "\n**You got one of the artists correct!**"
+                    else:
+                        response_message += "\n**Both the album name and artist are incorrect.**"
+
+                    # Add hints to the response
+                    if hint_album and hint_artist:
+                        additional_artist_hint = f" and {other_artists_count} other artist(s)" if other_artists_count > 0 else ""
+                        response_message += f"\nHint: `{hint_album} / {hint_artist}{additional_artist_hint}`"
+
+                    response_message += "\nTry again, or type `exit` to end the game."
+
+            await message.channel.send(response_message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
