@@ -676,4 +676,46 @@ async def on_message(message):
 
             await message.channel.send(response_message)
 
+@bot.command()
+async def blend(ctx):
+    current_user = sp.current_user()
+    uid = current_user['id'] 
+    playlists = sp.current_user_playlists(limit=50)['items']  # Increase limit if necessary
+    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == uid]  # Filter for user's own playlists
+
+    if not own_playlists:
+        await ctx.send("You don't have any public playlists.")
+        return
+
+    all_tracks = []
+    for playlist in own_playlists:
+        tracks = await fetch_all_playlist_tracks(playlist['id'])
+        all_tracks.extend(tracks)
+
+    if not all_tracks:
+        await ctx.send("Your playlists don't have any tracks.")
+        return
+
+    # Initialize message
+    msg = "**Your 50-track blend:**\n>>> "
+    message_character_limit = 2000
+
+    for i in range(1, 51):
+        if not all_tracks:  # Check if there are no more tracks to list
+            break
+
+        track = random.choice(all_tracks)
+        track_info = f"{i}. **{track['track']['name']}** by **{track['track']['artists'][0]['name']}**\n"
+        if len(msg) + len(track_info) > message_character_limit:
+            await ctx.send(msg)
+            msg = ">>> "  # Start a new message
+        msg += track_info
+        all_tracks.remove(track)
+
+    # Send any remaining message content
+    if msg.strip():
+        await ctx.send(msg)
+
+    await ctx.send("(More features coming soon!)")
+
 bot.run(os.getenv("DISCORD_TOKEN"))
