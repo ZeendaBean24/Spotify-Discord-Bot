@@ -81,25 +81,25 @@ async def info(ctx):
     )
     await ctx.send(description)
 
-@bot.command()
-async def test(ctx):
-    channel = ctx.message.channel
-    embed = discord.Embed(
-        title = 'Title',
-        description = 'This is description.',
-        colour = discord.Colour.blue()
-    )
+# @bot.command()
+# async def test(ctx):
+#     channel = ctx.message.channel
+#     embed = discord.Embed(
+#         title = 'Title',
+#         description = 'This is description.',
+#         colour = discord.Colour.blue()
+#     )
 
-    embed.set_footer(text='This is a footer')
-    embed.set_image(url='https://archive.org/download/discordprofilepictures//discordblue.png')
-    embed.set_thumbnail(url='https://archive.org/download/discordprofilepictures//discordblue.png')
-    embed.set_author(name='Zeen Liu', icon_url='https://archive.org/download/discordprofilepictures//discordblue.png')
-    embed.add_field(name='Field Name', value='Field Value', inline=False)
-    embed.add_field(name='Field Name', value='Field Value', inline=True)
-    embed.add_field(name='Field Name', value='Field Value', inline=True)
-    embed.add_field(name=channel, value='Field Value', inline=True)
+#     embed.set_footer(text='This is a footer')
+#     embed.set_image(url='https://archive.org/download/discordprofilepictures//discordblue.png')
+#     embed.set_thumbnail(url='https://archive.org/download/discordprofilepictures//discordblue.png')
+#     embed.set_author(name='Zeen Liu', icon_url='https://archive.org/download/discordprofilepictures//discordblue.png')
+#     embed.add_field(name='Field Name', value='Field Value', inline=False)
+#     embed.add_field(name='Field Name', value='Field Value', inline=True)
+#     embed.add_field(name='Field Name', value='Field Value', inline=True)
+#     embed.add_field(name=channel, value='Field Value', inline=True)
     
-    await ctx.send(channel, embed=embed)
+#     await ctx.send(channel, embed=embed)
 
 @bot.command()
 async def recent(ctx):
