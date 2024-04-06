@@ -473,6 +473,9 @@ async def preview(ctx):
                 "start_time": start_time
             }
 
+            # Start a timer to end the game after 1 minute
+            bot.loop.create_task(end_game_after_timeout(ctx.channel.id, 60))  # 60 seconds timeout
+
             await interaction.followup.send("Guess the song and artist! Type your answer in the format `[track name] / [artist name]`.")
         else:
             await interaction.followup.send("You are not connected to a voice channel.")
@@ -482,6 +485,15 @@ async def preview(ctx):
     view = discord.ui.View()
     view.add_item(select)
     await ctx.send("Select one of your playlists:", view=view)
+
+async def end_game_after_timeout(channel_id, timeout):
+    await asyncio.sleep(timeout)
+    game_data = ongoing_game.pop(channel_id, None)
+    if game_data:
+        voice_client = discord.utils.get(bot.voice_clients, guild=game_data['ctx'].guild)
+        if voice_client and voice_client.is_connected():
+            await voice_client.disconnect()
+        await game_data['ctx'].send("Time's up! The game has ended.")
 
 @bot.event
 async def on_message(message):
