@@ -49,9 +49,51 @@ async def on_ready():
     print(f'Successful! Logged in as {bot.user.name}')
 
 @bot.command()
+# greet command
 async def greet(ctx):
-    responses = ['Hello, hope you have a great day!', 'Hi there, welcome!', 'Greetings!']
-    await ctx.send(random.choice(responses))
+    greetings = [
+        ("Hello", "English"),
+        ("Hola", "Spanish"),
+        ("Bonjour", "French"),
+        ("Hallo", "German"),
+        ("Ciao", "Italian"),
+        ("Привет", "Russian"),
+        ("こんにちは", "Japanese"),
+        ("你好", "Chinese"),
+        ("안녕하세요", "Korean"),
+        ("Merhaba", "Turkish"),
+        ("Salam", "Arabic"),
+        ("नमस्ते", "Hindi"),
+        ("Shalom", "Hebrew"),
+        ("Olá", "Portuguese"),
+        ("Zdravstvuyte", "Russian"),
+        ("Sawubona", "Zulu"),
+        ("Jambo", "Swahili"),
+        ("Hej", "Swedish"),
+        ("Hei", "Finnish"),
+        ("Szia", "Hungarian"),
+        ("Goddag", "Danish"),
+        ("Halló", "Icelandic"),
+        ("Kumusta", "Filipino"),
+        ("Sawasdee", "Thai"),
+        ("Xin chào", "Vietnamese"),
+        ("Selamat siang", "Indonesian"),
+        ("Namaskar", "Nepali"),
+        ("Tere", "Estonian"),
+        ("Sveiki", "Latvian"),
+        ("Labas", "Lithuanian"),
+        ("Barev", "Armenian"),
+        ("Salam", "Persian"),
+        ("Yassas", "Greek"),
+        ("Dobry den", "Czech"),
+        ("Szervusz", "Hungarian"),
+        ("Buna", "Romanian"),
+        ("Zdravo", "Serbian"),
+        ("Pryvit", "Ukrainian"),
+        ("Sveikas", "Lithuanian"),
+    ]
+    msg = random.choice(greetings)
+    await ctx.send(f"## {msg[0]}! ({msg[1]})")
 
 @bot.command()
 async def luckynumber(ctx):
