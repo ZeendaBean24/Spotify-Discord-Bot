@@ -41,6 +41,9 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+# Global dictionary to track ongoing games by channel
+ongoing_game = {}
+
 @bot.event
 async def on_ready():
     print(f'Successful! Logged in as {bot.user.name}')
@@ -357,9 +360,6 @@ class SongPlaylistView(discord.ui.View):
         super().__init__(*args, **kwargs)
         self.add_item(RandomSongSelect(playlists=playlists, placeholder="Choose a playlist"))
 
-# Global dictionary to track ongoing games by channel
-ongoing_games = {}
-
 @bot.command()
 async def guess(ctx):
     user_id = sp.current_user()['id']
@@ -394,7 +394,8 @@ class GuessGameSelect(discord.ui.Select):
         artist_names = [artist['name'] for artist in selected_track['artists']]
 
         # Store game data
-        ongoing_games[interaction.channel_id] = {
+        ongoing_game[interaction.channel_id] = {
+            "game_type": "guess",
             "album_name": album_name.lower(),
             "artist_names": [artist.lower() for artist in artist_names],
             "attempts": 0
@@ -565,7 +566,7 @@ async def on_message(message):
             # Start forming the response message early to avoid sending an empty message
             if attempts == 10:
                 response_message += f"**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`."
-                del ongoing_games[message.channel.id]
+                ongoing_game.pop(message.channel.id, None)  # End the game after one guess
             else:
                 response_message += f"Attempt {attempts} *({10 - attempts} attempt(s) left)*: "
 
