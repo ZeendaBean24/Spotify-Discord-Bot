@@ -128,9 +128,10 @@ async def cmds(ctx):
 @bot.command()
 async def info(ctx):
     description = (
-        "Hey there! I'm Spotify Chef Bot, your music buddy here on Discord, by **@zeendabean24** and **@ntcie**." 
-        "I bring folks together and have many cool tricks to connect you and your pals through music."
-        "Use the prefix **'!'** and the command **!cmds** to start!"
+        "## @zeendabean24 & @ntcie Present: *Spotify Chef Bot*\n\n"
+        "I will be your music buddy here on Discord!\n" 
+        "I have many cool commands to connect you and your pals through music.\n\n"
+        "**Use the prefix **`!`** and **`!cmds`** to start!**"
     )
     await ctx.send(description)
 
