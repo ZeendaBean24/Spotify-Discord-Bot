@@ -125,6 +125,7 @@ async def cmds(ctx):
     ]
     await ctx.send('\n'.join(commands_list))
 
+
 @bot.command()
 async def info(ctx):
     description = (
@@ -649,13 +650,14 @@ async def on_message(message):
             # Start forming the response message early to avoid sending an empty message
             if attempts == 10:
                 response_message += f"**Too many attempts!** The correct answer was `{album_name} / {', '.join(artist_names)}`."
-                ongoing_game.pop(message.channel.id, None)  # End the game after one guess
+                ongoing_game.pop(message.channel.id, None)  # End the game after a correct guess
             else:
                 response_message += f"Attempt {attempts} *({10 - attempts} attempt(s) left)*: "
 
                 if album_match and artist_match:
                     response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempt(s)!**"
                     response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
+                    ongoing_game.pop(message.channel.id, None)  # End the game after a correct guess
                 else:
                     if album_match:
                         response_message += "\n**You got the album name correct!**"
