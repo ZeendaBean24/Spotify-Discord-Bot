@@ -531,7 +531,7 @@ async def preview(ctx):
             }
 
             # Start a timer to end the game after 1 minute
-            bot.loop.create_task(end_game_after_timeout(ctx.channel.id, 5))  # 60 seconds timeout
+            bot.loop.create_task(end_game_after_timeout(ctx.channel.id, 60))  # 60 seconds timeout
 
             await interaction.followup.send("Guess the song and artist! Type your answer in the format `[track name] / [artist name]`.")
         else:
