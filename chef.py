@@ -35,12 +35,12 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 def load_user_scores():
-    with open("users/users.json", "r") as file:
+    with open(file_path, "r") as file:
         return json.load(file)
 
 # Function to save user scores to JSON file
 def save_user_scores(user_scores):
-    with open("users/users.json", "w") as file:
+    with open(file_path, "w") as file:
         json.dump(user_scores, file)
 
 # Global dictionary to track ongoing games by channel
