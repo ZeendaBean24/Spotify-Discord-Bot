@@ -523,6 +523,8 @@ async def preview(ctx):
             return
 
         selected_track = random.choice(tracks)['track']
+        selected_track  = re.sub(r"\[.*?\]|\(.*?\)", "", selected_track['track']['name']).strip()
+
         preview_url = selected_track['preview_url']
 
         if preview_url is None:
@@ -633,6 +635,8 @@ async def on_message(message):
             guess = message.content.lower().strip()
 
             album_name, artist_names = game_data['album_name'], game_data['artist_names']
+            album_name = re.sub(r"\[.*?\]|\(.*?\)", "", album_name['track']['name']).strip()
+
             guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
             
             if guess == 'exit':
@@ -822,9 +826,9 @@ async def lyrics(ctx):
                 else:
                     line_counts[line] = line_counts.get(line, 0) + 1
     best_line = max(line_counts, key=line_counts.get)
-    await ctx.send(f"**Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> ## {best_line}")
+    await ctx.send(f"**30 Seconds! Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> ## {best_line}")
     try:
-        user_guess = await bot.wait_for('message')
+        user_guess = await bot.wait_for('message', timeout=30)
         user = user_guess.author
         uid = user.id
         username = user.name
