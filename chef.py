@@ -42,6 +42,24 @@ def load_user_scores():
 def save_user_scores(user_scores):
     with open(file_path, "w") as file:
         json.dump(user_scores, file)
+        
+def update_user_stats(user):
+    user_id = str(user.id)
+    user_scores = load_user_scores()
+
+    if user_id not in user_scores:
+        user_scores[user_id] = {
+            "username": user.name,
+            "pp": 0,  # Placeholder for points, adjust as needed
+            "uses": 0
+        }
+
+    user_scores[user_id]['uses'] += 1
+    save_user_scores(user_scores)
+
+@bot.event
+async def on_command_completion(ctx):
+    update_user_stats(ctx.author)
 
 # Global dictionary to track ongoing games by channel
 ongoing_game = {}
@@ -672,10 +690,10 @@ async def on_message(message):
                     if not uid in user_scores.keys():
                         user_scores[uid] = {
                             "username": username,
-                            "pp": 10-attempts,
+                            "pp": 0,
+                            "uses": 0
                         }
-                    else:
-                        user_scores[uid]['pp'] += 10-attempts
+                    user_scores[uid]['pp'] += 10-attempts
                     save_user_scores(user_scores)
                     response_message += f"\nCongratulations, **{username}**! You guessed both correctly in **{attempts} attempt(s)!**"
                     response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
