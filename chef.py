@@ -677,9 +677,10 @@ async def on_message(message):
                     else:
                         user_scores[uid]['pp'] += 10-attempts
                     save_user_scores(user_scores)
-                    response_message += f"\nCongratulations {username}! You guessed both correctly in **{attempts} attempt(s)!**"
+                    response_message += f"\nCongratulations, **{username}**! You guessed both correctly in **{attempts} attempt(s)!**"
                     response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
                     response_message += f"\nYou received **{10-attempts} coins**! *(10 - {attempts} attempts)*"
+                    response_message += f"\nYou currently have **{user_scores[uid]['pp']}** coins."
                     ongoing_game.pop(message.channel.id, None)  # End the game after a correct guess
                 else:
                     if album_match:
@@ -742,5 +743,17 @@ async def blend(ctx):
         await ctx.send(msg)
 
     await ctx.send("(More features coming soon!)")
+
+@bot.command()
+async def top(ctx):
+    user_scores = load_user_scores()
+    scores = []
+    msg = "**Top 10 users, by coins**"
+    for uid in user_scores:
+        scores.append([user_scores[uid]["pp"], user_scores[uid]["username"]])
+    scores.sort(reverse=True)
+    for i in range(min(10, len(scores))):
+        msg += f"\n{i+1}. **{scores[i][1]}**: {scores[i][0]} coins"
+    await ctx.send(msg)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
