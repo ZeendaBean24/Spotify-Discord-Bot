@@ -1,5 +1,4 @@
 .env
 .cache
-.json
-/users.json
+users
 __pycache__
