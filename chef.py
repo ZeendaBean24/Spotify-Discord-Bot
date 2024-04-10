@@ -771,12 +771,24 @@ async def blend(ctx):
 async def top(ctx):
     user_scores = load_user_scores()
     scores = []
-    msg = "**Top 10 users, by coins**"
+    msg = "**Top 10 users (globally), by coins**"
     for uid in user_scores:
         scores.append([user_scores[uid]["pp"], user_scores[uid]["username"]])
     scores.sort(reverse=True)
     for i in range(min(10, len(scores))):
         msg += f"\n{i+1}. **{scores[i][1]}**: {scores[i][0]} coins"
+    await ctx.send(msg)
+
+@bot.command()
+async def uses(ctx):
+    user_scores = load_user_scores()
+    scores = []
+    msg = "**Top 10 users (globally), by command uses**"
+    for uid in user_scores:
+        scores.append([user_scores[uid]["uses"], user_scores[uid]["username"]])
+    scores.sort(reverse=True)
+    for i in range(min(10, len(scores))):
+        msg += f"\n{i+1}. **{scores[i][1]}**: {scores[i][0]} command uses"
     await ctx.send(msg)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
