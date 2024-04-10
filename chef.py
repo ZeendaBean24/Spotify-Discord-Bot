@@ -1,14 +1,7 @@
-import discord
-import os
-import random
-import spotipy
+import discord, os, random, spotipy, asyncio, locale, time
 from spotipy.oauth2 import SpotifyOAuth
 from discord.ext import commands
 from dotenv import load_dotenv
-import asyncio
-import locale
-import time
-
 # import urllib.parse
 
 # Load the Opus library
@@ -417,7 +410,12 @@ class SongPlaylistView(discord.ui.View):
 
 @bot.command()
 async def guess(ctx):
-    user_id = sp.current_user()['id']
+    # Check if the command is being used in a DM channel
+    if not isinstance(ctx.channel, discord.DMChannel):
+        await ctx.send("You need to be in DMs to execute this command.")
+        return
+    
+    user_id = ctx.author.id  # Get the user's ID
     playlists = sp.current_user_playlists(limit=50)['items']
     own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
