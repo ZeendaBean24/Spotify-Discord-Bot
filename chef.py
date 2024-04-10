@@ -1,4 +1,4 @@
-import discord, os, random, spotipy, asyncio, locale, time, json, re
+import discord, os, random, spotipy, asyncio, locale, time, json, re, lyricsgenius
 from spotipy.oauth2 import SpotifyOAuth
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -29,6 +29,7 @@ load_dotenv()
 client_id = os.getenv("SPOTIPY_CLIENT_ID")
 client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
 redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
+genius_api_token = os.getenv("GENIUS_ACCESS_TOKEN")
 file_path = os.getenv('FILE_PATH')
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"))
@@ -790,5 +791,60 @@ async def uses(ctx):
     for i in range(min(10, len(scores))):
         msg += f"\n{i+1}. **{scores[i][1]}**: {scores[i][0]} command uses"
     await ctx.send(msg)
+
+@bot.command()
+async def lyrics(ctx):
+    current_user = sp.current_user()
+    uid = current_user['id'] 
+    playlists = sp.current_user_playlists(limit=50)['items']  # Increase limit if necessary
+    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == uid]  # Filter for user's own playlists
+    if not own_playlists:
+        await ctx.send("u don't have any public playlists :(")
+        return
+    all_tracks = []
+    for playlist in own_playlists:
+        tracks = await fetch_all_playlist_tracks(playlist['id'])
+        all_tracks.extend(tracks)
+    random_track = random.choice(all_tracks)
+    genius = lyricsgenius.Genius(genius_api_token)
+    track_name = re.sub(r"\[.*?\]|\(.*?\)", "", random_track['track']['name']).strip()
+    song = genius.search_song(track_name, random_track['track']['artists'][0]['name'])
+    if not song:
+        await ctx.send(f"Could not fetch the lyrics of the song **{track_name}** by **{random_track['track']['artists'][0]['name']}** :( please reroll command")
+        return
+    lyrics = song.lyrics.split('\n')
+    line_counts = {}
+    for line in lyrics[1:][:-1]:
+        if line.strip():
+            if not '[' in line and not ']' in line and not '(' in line and not ')' in line:
+                if track_name in line:
+                    line_counts[line] = line_counts.get(line, 0) + 2
+                else:
+                    line_counts[line] = line_counts.get(line, 0) + 1
+    best_line = max(line_counts, key=line_counts.get)
+    await ctx.send(f"**Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] | [Artist]`!\n\n>>> ## {best_line}")
+    try:
+        user_guess = await bot.wait_for('message')
+        user = user_guess.author
+        uid = user.id
+        username = user.name
+    except asyncio.TimeoutError:
+        await ctx.send(f"womp womp time's up. The correct answer is **{random_track['track']['name']}** by **{random_track['track']['artists'][0]['name']}**.")
+        return
+    if user_guess.content.lower().replace(' ', '').split('|') == [track_name.replace(' ', '').lower(), random_track['track']['artists'][0]['name'].replace(' ', '').lower()]:
+        user_scores = load_user_scores()
+        uid = str(uid)
+        if not uid in user_scores.keys():
+            user_scores[uid] = {
+                "username": username,
+                "pp": 0,
+                "uses": 0
+            }
+        else:
+            user_scores[uid]['pp'] += 1
+        save_user_scores(user_scores)
+        await ctx.send(f"GG **{username}**! Your guess is correct. You get **1** coin. You currently have **{user_scores[uid]['pp']}** coins.")
+    else:
+        await ctx.send(f"womp womp you are incorrect. The correct answer is **{random_track['track']['name']}** by **{random_track['track']['artists'][0]['name']}**.")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
