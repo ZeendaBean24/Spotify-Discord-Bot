@@ -606,10 +606,11 @@ async def on_message(message):
 
         # Handling for the album guessing game
         elif game_type == 'guess':
+            guess = message.content.lower().strip()
+
             album_name, artist_names = game_data['album_name'], game_data['artist_names']
             guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
             
-            guess = message.content.lower().strip()
             if guess == 'exit':
                 await message.channel.send("Game ended. Thanks for playing!")
                 await message.channel.send(f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`.")
