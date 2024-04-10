@@ -527,7 +527,12 @@ async def preview(ctx):
         if preview_url is None:
             await interaction.followup.send("Preview not available for the selected track.")
             return
-
+        
+        # Check if the author is in a guild (server)
+        if ctx.guild is None:
+            await ctx.send("You must use this command in a voice channel in a server!")
+            return
+    
         if ctx.author.voice and ctx.author.voice.channel:
             channel = ctx.author.voice.channel
             voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
