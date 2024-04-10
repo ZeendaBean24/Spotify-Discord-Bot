@@ -484,7 +484,7 @@ class GuessGameSelect(discord.ui.Select):
 
         embed = discord.Embed(
             title="Guess the Album and Artist!",
-            description="Type your guess in the format `album name / artist name`. **You get 10 attempts!** *Hints will be progressively provided as you guess incorrectly.* Type `exit` to end the game at any point.",
+            description="Type your guess in the format `[Album name] / [Artist]`. **You get 10 attempts!** *Hints will be progressively provided as you guess incorrectly.* Type `exit` to end the game at any point.",
             color=discord.Color.blue()
         )
         embed.set_image(url=album_cover_url)
@@ -564,7 +564,7 @@ async def preview(ctx):
             # Start a timer to end the game after 1 minute
             bot.loop.create_task(end_game_after_timeout(ctx.channel.id, 60))  # 60 seconds timeout
 
-            await interaction.followup.send("Guess the song and artist! Type your answer in the format `[track name] / [artist name]`.")
+            await interaction.followup.send("Guess the song and artist! Type your answer in the format `[Track name] / [Artist]`.")
         else:
             await interaction.followup.send("You are not connected to a voice channel.")
 
@@ -822,7 +822,7 @@ async def lyrics(ctx):
                 else:
                     line_counts[line] = line_counts.get(line, 0) + 1
     best_line = max(line_counts, key=line_counts.get)
-    await ctx.send(f"**Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] | [Artist]`!\n\n>>> ## {best_line}")
+    await ctx.send(f"**Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> ## {best_line}")
     try:
         user_guess = await bot.wait_for('message')
         user = user_guess.author
@@ -831,7 +831,7 @@ async def lyrics(ctx):
     except asyncio.TimeoutError:
         await ctx.send(f"womp womp time's up. The correct answer is **{random_track['track']['name']}** by **{random_track['track']['artists'][0]['name']}**.")
         return
-    if user_guess.content.lower().replace(' ', '').split('|') == [track_name.replace(' ', '').lower(), random_track['track']['artists'][0]['name'].replace(' ', '').lower()]:
+    if user_guess.content.lower().replace(' ', '').split('/') == [track_name.replace(' ', '').lower(), random_track['track']['artists'][0]['name'].replace(' ', '').lower()]:
         user_scores = load_user_scores()
         uid = str(uid)
         if not uid in user_scores.keys():
