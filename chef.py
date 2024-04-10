@@ -523,7 +523,7 @@ async def preview(ctx):
             return
 
         selected_track = random.choice(tracks)['track']
-        selected_track  = re.sub(r"\[.*?\]|\(.*?\)", "", selected_track['track']['name']).strip()
+        selected_track  = re.sub(r"\[.*?\]|\(.*?\)", "", selected_track).strip()
 
         preview_url = selected_track['preview_url']
 
@@ -635,7 +635,7 @@ async def on_message(message):
             guess = message.content.lower().strip()
 
             album_name, artist_names = game_data['album_name'], game_data['artist_names']
-            album_name = re.sub(r"\[.*?\]|\(.*?\)", "", album_name['track']['name']).strip()
+            album_name = re.sub(r"\[.*?\]|\(.*?\)", "", album_name).strip()
 
             guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
             
@@ -848,7 +848,9 @@ async def lyrics(ctx):
             user_scores[uid]['pp'] += 1
         save_user_scores(user_scores)
         await ctx.send(f"GG **{username}**! Your guess is correct. You get **1** coin. You currently have **{user_scores[uid]['pp']}** coins.")
+        return
     else:
-        await ctx.send(f"womp womp you are incorrect. The correct answer is **{random_track['track']['name']}** by **{random_track['track']['artists'][0]['name']}**.")
+        await ctx.send(f"womp womp you are incorrect. The correct answer is `{random_track['track']['name']} / {random_track['track']['artists'][0]['name']}`.")
+        return
 
 bot.run(os.getenv("DISCORD_TOKEN"))
