@@ -662,6 +662,19 @@ async def on_message(message):
                 response_message += f"Attempt {attempts} *({10 - attempts} attempt(s) left)*: "
 
                 if album_match and artist_match:
+                    user = message.author
+                    uid = user.id
+                    username = user.name
+                    user_scores = load_user_scores()
+                    uid = str(uid)
+                    if not uid in user_scores.keys():
+                        user_scores[uid] = {
+                            "username": username,
+                            "pp": 1,
+                        }
+                    else:
+                        user_scores[uid]['pp'] += 1
+                    save_user_scores(user_scores)
                     response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempt(s)!**"
                     response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
                     ongoing_game.pop(message.channel.id, None)  # End the game after a correct guess
