@@ -606,14 +606,15 @@ async def on_message(message):
 
         # Handling for the album guessing game
         elif game_type == 'guess':
+            album_name, artist_names = game_data['album_name'], game_data['artist_names']
+            guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
+            
             guess = message.content.lower().strip()
             if guess == 'exit':
                 await message.channel.send("Game ended. Thanks for playing!")
+                await message.channel.send(f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`.")
                 ongoing_game.pop(message.channel.id, None)
                 return
-
-            album_name, artist_names = game_data['album_name'], game_data['artist_names']
-            guessed_album, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
 
             # Logic for checking guesses, providing hints, etc.
             # Update this part with the specific logic for the album guessing game
@@ -670,13 +671,14 @@ async def on_message(message):
                     if not uid in user_scores.keys():
                         user_scores[uid] = {
                             "username": username,
-                            "pp": 1,
+                            "pp": 10-attempts,
                         }
                     else:
-                        user_scores[uid]['pp'] += 1
+                        user_scores[uid]['pp'] += 10-attempts
                     save_user_scores(user_scores)
-                    response_message += f"\nCongratulations! You guessed both correctly in **{attempts} attempt(s)!**"
+                    response_message += f"\nCongratulations {username}! You guessed both correctly in **{attempts} attempt(s)!**"
                     response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
+                    response_message += f"\nYou received **{10-attempts} coins**! *(10 - {attempts} attempts)*"
                     ongoing_game.pop(message.channel.id, None)  # End the game after a correct guess
                 else:
                     if album_match:
