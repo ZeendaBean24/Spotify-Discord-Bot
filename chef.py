@@ -1,4 +1,4 @@
-import discord, os, random, spotipy, asyncio, locale, time
+import discord, os, random, spotipy, asyncio, locale, time, json, re
 from spotipy.oauth2 import SpotifyOAuth
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -29,10 +29,19 @@ load_dotenv()
 client_id = os.getenv("SPOTIPY_CLIENT_ID")
 client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
 redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
+file_path = os.getenv('FILE_PATH')
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-read-recently-played"))
-
 bot = commands.Bot(command_prefix='!', intents=intents)
+
+def load_user_scores():
+    with open(file_path, "r") as file:
+        return json.load(file)
+
+# Function to save user scores to JSON file
+def save_user_scores(user_scores):
+    with open(file_path, "w") as file:
+        json.dump(user_scores, file)
 
 # Global dictionary to track ongoing games by channel
 ongoing_game = {}
