@@ -58,24 +58,39 @@ def update_user_stats(user):
     user_scores[user_id]['uses'] += 1
     save_user_scores(user_scores)
 
-def fetch_playlists_by_genre(genre_keyword=None):
-    playlists = []
-    offset = random.randint(0, 50)  # Random offset for variety
+# Define a dictionary mapping genre codes to specific playlist URIs
+playlist_uris_by_genre = {
+    1: ["spotify:playlist:PLAYLIST_URI_1", "spotify:playlist:PLAYLIST_URI_2"],  # Pop
+    2: ["spotify:playlist:PLAYLIST_URI_3", "spotify:playlist:PLAYLIST_URI_4"],  # Rap/Hip-Hop
+    3: ["spotify:playlist:PLAYLIST_URI_5", "spotify:playlist:PLAYLIST_URI_6"],  # Indie/Rock
+    4: ["spotify:playlist:PLAYLIST_URI_7", "spotify:playlist:PLAYLIST_URI_8"],  # Classical/Lofi
+    5: ["spotify:playlist:PLAYLIST_URI_9", "spotify:playlist:PLAYLIST_URI_10"], # Jazz
+}
 
-    if genre_keyword:
-        # Search for playlists based on the genre keyword
-        results = sp.search(q=f"genre:{genre_keyword}", type='playlist', limit=50, offset=offset)
+# Function to fetch playlists based on genre code
+def fetch_playlists_by_genre(genre_code=None):
+    if genre_code in playlist_uris_by_genre:
+        playlist_uris = playlist_uris_by_genre[genre_code]
+        playlists = [sp.playlist(uri) for uri in playlist_uris]
     else:
-        # Fetch featured playlists from Spotify
-        results = sp.featured_playlists(limit=50, offset=offset)
-    
-    if 'playlists' in results:
-        for playlist in results['playlists']['items']:
-            # Filter to include only Spotify's playlists
-            if playlist['owner']['display_name'] == 'Spotify':
-                playlists.append(playlist)
-    
-    return random.sample(playlists, 3) if len(playlists) > 3 else playlists
+        # Fetch a larger number of Spotify's featured playlists and randomly pick 3 if no specific genre is chosen
+        results = sp.featured_playlists(limit=50)
+        all_playlists = results['playlists']['items']
+        spotify_playlists = [p for p in all_playlists if p['owner']['display_name'] == 'Spotify']
+        playlists = random.sample(spotify_playlists, 3) if len(spotify_playlists) > 3 else spotify_playlists
+
+    return playlists
+
+# Example usage in a command
+@bot.command()
+async def guess(ctx, genre_code: int = None):
+    playlists = fetch_playlists_by_genre(genre_code)
+    if not playlists:
+        await ctx.send("No playlists found.")
+        return
+
+    await ctx.send("Select one of the playlists:", view=GuessPlaylistView(playlists=playlists))
+
 
 @bot.event
 async def on_command_completion(ctx):
