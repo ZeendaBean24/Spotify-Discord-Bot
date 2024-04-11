@@ -448,21 +448,25 @@ class SongPlaylistView(discord.ui.View):
         self.add_item(RandomSongSelect(playlists=playlists, placeholder="Choose a playlist"))
 
 @bot.command()
-async def guess(ctx):
+async def guess(ctx, genre_code: int = None):
     # Check if the command is being used in a DM channel
     if not isinstance(ctx.channel, discord.DMChannel):
         await ctx.send("You need to be in DMs to execute this command.")
         return
     
-    user_id = sp.current_user()['id']
-    playlists = sp.current_user_playlists(limit=50)['items']
-    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+    genre_keywords = {1: "pop", 2: "rap/hiphop", 3: "indie/rock", 4: "classical/lofi", 5: "jazz"}
+    genre_keyword = genre_keywords.get(genre_code)
+    playlists = fetch_playlists_by_genre(genre_keyword)
+    
+    # user_id = sp.current_user()['id']
+    # playlists = sp.current_user_playlists(limit=50)['items']
+    # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
-    if not own_playlists:
-        await ctx.send("You don't have any private playlists.")
+    if not playlists:
+        await ctx.send("Fetch didn't work. Try again.")
         return
 
-    await ctx.send("Select one of your private playlists:", view=GuessPlaylistView(playlists=own_playlists))
+    await ctx.send("Select a Spotify playlist: ", view=GuessPlaylistView(playlists=playlists))
 
 class GuessGameSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
