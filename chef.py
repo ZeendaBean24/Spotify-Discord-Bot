@@ -58,6 +58,17 @@ def update_user_stats(user):
     user_scores[user_id]['uses'] += 1
     save_user_scores(user_scores)
 
+def fetch_playlists_by_genre(genre_keyword=None):
+    if genre_keyword:
+        # Search for playlists based on the genre keyword
+        results = sp.search(q=f"genre:{genre_keyword}", type='playlist', limit=3)
+    else:
+        # Fetch featured playlists from Spotify
+        results = sp.featured_playlists(limit=3)
+    
+    playlists = results['playlists']['items']
+    return playlists
+
 @bot.event
 async def on_command_completion(ctx):
     update_user_stats(ctx.author)
