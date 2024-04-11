@@ -60,7 +60,7 @@ def update_user_stats(user):
 
 # Define a dictionary mapping genre codes to specific playlist URIs
 playlist_uris_by_genre = {
-    1: ["spotify:playlist:PLAYLIST_URI_1", "spotify:playlist:PLAYLIST_URI_2"],  # Pop
+    1: ["spotify:playlist:37i9dQZF1DXcOFePJj4Rgb", "spotify:playlist:37i9dQZF1EQncLwOalG3K7"],  # Pop
     2: ["spotify:playlist:PLAYLIST_URI_3", "spotify:playlist:PLAYLIST_URI_4"],  # Rap/Hip-Hop
     3: ["spotify:playlist:PLAYLIST_URI_5", "spotify:playlist:PLAYLIST_URI_6"],  # Indie/Rock
     4: ["spotify:playlist:PLAYLIST_URI_7", "spotify:playlist:PLAYLIST_URI_8"],  # Classical/Lofi
@@ -80,17 +80,6 @@ def fetch_playlists_by_genre(genre_code=None):
         playlists = random.sample(spotify_playlists, 3) if len(spotify_playlists) > 3 else spotify_playlists
 
     return playlists
-
-# Example usage in a command
-@bot.command()
-async def guess(ctx, genre_code: int = None):
-    playlists = fetch_playlists_by_genre(genre_code)
-    if not playlists:
-        await ctx.send("No playlists found.")
-        return
-
-    await ctx.send("Select one of the playlists:", view=GuessPlaylistView(playlists=playlists))
-
 
 @bot.event
 async def on_command_completion(ctx):
@@ -477,9 +466,7 @@ async def guess(ctx, genre_code: int = None):
         await ctx.send("You need to be in DMs to execute this command.")
         return
     
-    genre_keywords = {1: "pop", 2: "rap/hiphop", 3: "indie/rock", 4: "classical/lofi", 5: "jazz"}
-    genre_keyword = genre_keywords.get(genre_code)
-    playlists = fetch_playlists_by_genre(genre_keyword)
+    playlists = fetch_playlists_by_genre(genre_code)
     
     # user_id = sp.current_user()['id']
     # playlists = sp.current_user_playlists(limit=50)['items']
@@ -489,7 +476,7 @@ async def guess(ctx, genre_code: int = None):
         await ctx.send("Fetch didn't work. Try again.")
         return
 
-    await ctx.send("Select a Spotify playlist: ", view=GuessPlaylistView(playlists=playlists))
+    await ctx.send("Select a Spotify playlist:", view=GuessPlaylistView(playlists=playlists))
 
 class GuessGameSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
