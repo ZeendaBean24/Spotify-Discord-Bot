@@ -67,11 +67,14 @@ playlist_uris_by_genre = {
     5: ["spotify:playlist:PLAYLIST_URI_9", "spotify:playlist:PLAYLIST_URI_10"], # Jazz
 }
 
-# Function to fetch playlists based on genre code
+# Function to fetch random playlists based on genre code
 def fetch_playlists_by_genre(genre_code=None):
+    playlists = []
+
     if genre_code in playlist_uris_by_genre:
         playlist_uris = playlist_uris_by_genre[genre_code]
-        playlists = [sp.playlist(uri) for uri in playlist_uris]
+        selected_uris = random.sample(playlist_uris, min(len(playlist_uris), 3))
+        playlists = [sp.playlist(uri) for uri in selected_uris]
     else:
         # Fetch a larger number of Spotify's featured playlists and randomly pick 3 if no specific genre is chosen
         results = sp.featured_playlists(limit=50)
