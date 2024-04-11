@@ -59,15 +59,23 @@ def update_user_stats(user):
     save_user_scores(user_scores)
 
 def fetch_playlists_by_genre(genre_keyword=None):
+    playlists = []
+    offset = random.randint(0, 50)  # Random offset for variety
+
     if genre_keyword:
         # Search for playlists based on the genre keyword
-        results = sp.search(q=f"genre:{genre_keyword}", type='playlist', limit=3)
+        results = sp.search(q=f"genre:{genre_keyword}", type='playlist', limit=50, offset=offset)
     else:
         # Fetch featured playlists from Spotify
-        results = sp.featured_playlists(limit=3)
+        results = sp.featured_playlists(limit=50, offset=offset)
     
-    playlists = results['playlists']['items']
-    return playlists
+    if 'playlists' in results:
+        for playlist in results['playlists']['items']:
+            # Filter to include only Spotify's playlists
+            if playlist['owner']['display_name'] == 'Spotify':
+                playlists.append(playlist)
+    
+    return random.sample(playlists, 3) if len(playlists) > 3 else playlists
 
 @bot.event
 async def on_command_completion(ctx):
