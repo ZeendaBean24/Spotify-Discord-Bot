@@ -76,11 +76,10 @@ def fetch_playlists_by_genre(genre_code=None):
         selected_uris = random.sample(playlist_uris, min(len(playlist_uris), 3))
         playlists = [sp.playlist(uri) for uri in selected_uris]
     else:
-        # Fetch a larger number of Spotify's featured playlists and randomly pick 3 if no specific genre is chosen
-        results = sp.featured_playlists(limit=50)
-        all_playlists = results['playlists']['items']
-        spotify_playlists = [p for p in all_playlists if p['owner']['display_name'] == 'Spotify']
-        playlists = random.sample(spotify_playlists, 3) if len(spotify_playlists) > 3 else spotify_playlists
+        # Flatten all playlist URIs into a single list
+        all_uris = [uri for uris in playlist_uris_by_genre.values() for uri in uris]
+        selected_uris = random.sample(all_uris, min(len(all_uris), 3))
+        playlists = [sp.playlist(uri) for uri in selected_uris]
 
     return playlists
 
