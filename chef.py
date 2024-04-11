@@ -415,7 +415,7 @@ class RandomSongSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.playlists = playlists
-        self.options = [discord.SelectOption(label=playlist['name'], description=str(playlist['id']), value=playlist['id']) for playlist in playlists]
+        self.options = [discord.SelectOption(label=playlist['name'], value=playlist['id']) for playlist in playlists]
     
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
