@@ -419,16 +419,18 @@ async def popularity(ctx, genre_code: int = None):
     await ctx.send("Select one of your playlists to analyze popularity:", view=PopularityView(playlists=playlists))
 
 @bot.command()
-async def randomsong(ctx):
-    user_id = sp.current_user()['id']
-    playlists = sp.current_user_playlists(limit=50)['items']
-    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+async def randomsong(ctx, genre_code: int = None):
+    playlists = fetch_playlists_by_genre(genre_code)
 
-    if not own_playlists:
+    # user_id = sp.current_user()['id']
+    # playlists = sp.current_user_playlists(limit=50)['items']
+    # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+
+    if not playlists:
         await ctx.send("You don't have any private playlists.")
         return
 
-    await ctx.send("Select one of your private playlists:", view=SongPlaylistView(playlists=own_playlists))
+    await ctx.send("Select one of your private playlists:", view=SongPlaylistView(playlists=playlists))
 
 class RandomSongSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
