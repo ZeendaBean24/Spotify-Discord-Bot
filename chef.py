@@ -529,18 +529,21 @@ class GuessPlaylistView(discord.ui.View):
 ongoing_game = {}
 
 @bot.command()
-async def preview(ctx):
-    user_id = sp.current_user()['id']
-    playlists = sp.current_user_playlists(limit=50)['items']
-    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+async def preview(ctx, genre_code: int = None):
+    
+    playlists = fetch_playlists_by_genre(genre_code)
+    
+    # user_id = sp.current_user()['id']
+    # playlists = sp.current_user_playlists(limit=50)['items']
+    # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
-    if not own_playlists:
+    if not playlists:
         await ctx.send("You don't have any private playlists.")
         return
 
     select = discord.ui.Select(placeholder="Choose your playlist",
                                options=[discord.SelectOption(label=playlist['name'], value=playlist['id'])
-                                        for playlist in own_playlists])
+                                        for playlist in playlists])
 
     async def select_callback(interaction):
         await interaction.response.defer()
