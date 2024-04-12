@@ -403,17 +403,20 @@ class PopularityView(discord.ui.View):
         self.add_item(PopularitySelect(playlists=playlists, placeholder="Choose a playlist"))
 
 @bot.command()
-async def popularity(ctx):
-    current_user = sp.current_user()
-    user_id = current_user['id']
-    playlists = sp.current_user_playlists(limit=50)['items']
-    own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+async def popularity(ctx, genre_code: int = None):
 
-    if not own_playlists:
+    playlists = fetch_playlists_by_genre(genre_code)
+
+    # current_user = sp.current_user()
+    # user_id = current_user['id']
+    # playlists = sp.current_user_playlists(limit=50)['items']
+    # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+
+    if not playlists:
         await ctx.send("You don't have any playlists.")
         return
 
-    await ctx.send("Select one of your playlists to analyze popularity:", view=PopularityView(playlists=own_playlists))
+    await ctx.send("Select one of your playlists to analyze popularity:", view=PopularityView(playlists=playlists))
 
 @bot.command()
 async def randomsong(ctx):
