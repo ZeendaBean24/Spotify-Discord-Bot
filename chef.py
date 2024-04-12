@@ -555,7 +555,8 @@ async def preview(ctx, genre_code: int = None):
             return
 
         selected_track = random.choice(tracks)['track']
-        selected_track  = re.sub(r"\[.*?\]|\(.*?\)", "", selected_track).strip()
+        track_name = selected_track['name']  # Extract the name of the track
+        track_name = re.sub(r"\[.*?\]|\(.*?\)", "", track_name).strip()  # Clean the track name
 
         preview_url = selected_track['preview_url']
 
