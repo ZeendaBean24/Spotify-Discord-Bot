@@ -413,10 +413,10 @@ async def popularity(ctx, genre_code: int = None):
     # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
     if not playlists:
-        await ctx.send("You don't have any playlists.")
+        await ctx.send("Fetch didn't work. Try again.")
         return
 
-    await ctx.send("Select one of your playlists to analyze popularity:", view=PopularityView(playlists=playlists))
+    await ctx.send("Select a Spotify playlist to analyze popularity:", view=PopularityView(playlists=playlists))
 
 @bot.command()
 async def randomsong(ctx, genre_code: int = None):
@@ -427,10 +427,10 @@ async def randomsong(ctx, genre_code: int = None):
     # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
     if not playlists:
-        await ctx.send("You don't have any private playlists.")
+        await ctx.send("Fetch didn't work. Try again.")
         return
 
-    await ctx.send("Select one of your private playlists:", view=SongPlaylistView(playlists=playlists))
+    await ctx.send("Select a Spotify playlist:", view=SongPlaylistView(playlists=playlists))
 
 class RandomSongSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
@@ -543,7 +543,7 @@ async def preview(ctx, genre_code: int = None):
     # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
     if not playlists:
-        await ctx.send("You don't have any private playlists.")
+        await ctx.send("Fetch didn't work. Try again.")
         return
 
     select = discord.ui.Select(placeholder="Choose your playlist",
@@ -612,7 +612,7 @@ async def preview(ctx, genre_code: int = None):
 
     view = discord.ui.View()
     view.add_item(select)
-    await ctx.send("Select one of your playlists:", view=view)
+    await ctx.send("Select a Spotify playlist:", view=view)
 
 async def end_game_after_timeout(channel_id, timeout):
     await asyncio.sleep(timeout)
