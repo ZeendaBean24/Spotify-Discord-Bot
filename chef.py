@@ -58,13 +58,15 @@ def update_user_stats(user):
     user_scores[user_id]['uses'] += 1
     save_user_scores(user_scores)
 
+#TODO: REMOVE DUPLICATES IN RANDOM 3, ADD MIXES? (Except for Pop mix - already added)
 # Define a dictionary mapping genre codes to specific playlist URIs
 playlist_uris_by_genre = {
-    1: ["spotify:playlist:37i9dQZF1DXcOFePJj4Rgb", "spotify:playlist:37i9dQZF1EQncLwOalG3K7"],  # Pop
-    2: ["spotify:playlist:PLAYLIST_URI_3", "spotify:playlist:PLAYLIST_URI_4"],  # Rap/Hip-Hop
-    3: ["spotify:playlist:PLAYLIST_URI_5", "spotify:playlist:PLAYLIST_URI_6"],  # Indie/Rock
-    4: ["spotify:playlist:PLAYLIST_URI_7", "spotify:playlist:PLAYLIST_URI_8"],  # Classical/Lofi
-    5: ["spotify:playlist:PLAYLIST_URI_9", "spotify:playlist:PLAYLIST_URI_10"], # Jazz
+    1: ["spotify:playlist:37i9dQZF1DXcOFePJj4Rgb", "spotify:playlist:37i9dQZF1EQncLwOalG3K7", "spotify:playlist:1udqwx26htiKljZx4HwVxs", "spotify:playlist:5cAz3DR6eFPhxH4ozTKQcx", "spotify:playlist:37i9dQZF1DXcxvFzl58uP7", "spotify:playlist:6sLKqrUF3TEfcMkcS6P3gu", "spotify:playlist:37i9dQZF1DWWvvyNmW9V9a", "spotify:playlist:37i9dQZF1DWWqNV5cS50j6", "spotify:playlist:37i9dQZF1DX5y8xoSWyhcz", "spotify:playlist:4GZT3MbZ4IwjtIxKuYerfu", "spotify:playlist:6mtYuOxzl58vSGnEDtZ9uB", "spotify:playlist:37i9dQZF1DX4o1oenSJRJd"],  # Pop
+    2: ["spotify:playlist:37i9dQZF1DX9oh43oAzkyx", "spotify:playlist:37i9dQZF1DWWY64wDtewQt", "spotify:playlist:37i9dQZF1DWUVpAXiEPK8P", "spotify:playlist:37i9dQZF1DX0XUsuxWHRQd", "spotify:playlist:37i9dQZF1DX76Wlfdnj7AP"],  # Rap/Hip-Hop/Phonk
+    3: ["spotify:playlist:37i9dQZF1DWVV27DiNWxkR", "spotify:playlist:37i9dQZF1DWXRqgorJj26U", "spotify:playlist:37i9dQZF1DX4mWCZw6qYIw", "spotify:playlist:37i9dQZF1DWVsh2vXzlKFb", "spotify:playlist:37i9dQZF1DX5y8xoSWyhcz", "spotify:playlist:37i9dQZF1DWT6zAeOrK0H1", "spotify:playlist:37i9dQZF1DX0E9XMGembJo", "spotify:playlist:37i9dQZF1DX8uc99HoZBLU", "spotify:playlist:37i9dQZF1DX26DKvjp0s9M", "spotify:playlist:37i9dQZF1DXb9izPIc0SCS", "spotify:playlist:37i9dQZF1DX2sUQwD7tbmL", "spotify:playlist:37i9dQZF1DX4OzrY981I1W", "spotify:playlist:37i9dQZF1DX0CIO5EOSHeD", "spotify:playlist:37i9dQZF1DX9crXQ0wuuXE", "spotify:playlist:37i9dQZF1DXad2sxzzYX1N"],  # Indie/Rock
+    4: ["spotify:playlist:37i9dQZF1DX1jtMPFVTOER", "spotify:playlist:37i9dQZF1DWWQRwui0ExPn", "spotify:playlist:37i9dQZF1DX0CIO5EOSHeD", "spotify:playlist:37i9dQZF1DWWEJlAGA9gs0", "spotify:playlist:37i9dQZF1DX8Sz1gsYZdwj", "spotify:playlist:37i9dQZF1DWV7EzJMK2FUI"],  # Classical/Lofi/Jazz
+    5: ["spotify:playlist:37i9dQZF1DWZoDfksyokHA", "spotify:playlist:37i9dQZF1DX9Z3vMB2b8im", "spotify:playlist:37i9dQZF1DX4WYpdgoIcn6", "spotify:playlist:37i9dQZF1DWTKdpN2FAbcN", "spotify:playlist:37i9dQZF1DX4mWCZw6qYIw", "spotify:playlist:37i9dQZF1DX4mWCZw6qYIw", "spotify:playlist:37i9dQZF1DXdPec7aLTmlC", "spotify:playlist:37i9dQZF1DX889U0CL85jj", "spotify:playlist:37i9dQZF1DX5D8j6p4CXZT", "spotify:playlist:37i9dQZF1DXaK0O81Xtkis", "spotify:playlist:37i9dQZF1DX3rxVfibe1L0", "spotify:playlist:37i9dQZF1DXdl6IPOySdX4", "spotify:playlist:37i9dQZF1DXcbAIldMQMIs", "spotify:playlist:37i9dQZF1DX8OR0U4UGusN", "spotify:playlist:37i9dQZF1DX4OzrY981I1W", "spotify:playlist:37i9dQZF1DX3YSRoSdA634", "spotify:playlist:37i9dQZF1DXbEm2sKzgoJ8", "spotify:playlist:37i9dQZF1DX2DKrE9X6Abv", "spotify:playlist:37i9dQZF1DWWVULl5wUsL9", "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M", "spotify:playlist:37i9dQZF1DX5Vy6DFOcx00"], # Special Series (Multiple)
+    6: ["spotify:playlist:37i9dQZF1DXbrUpGvoi3TS", "spotify:playlist:37i9dQZF1DX7qK8ma5wgG1", "spotify:playlist:37i9dQZF1DWVV27DiNWxkR", "spotify:playlist:37i9dQZF1DWXxauMBOQPxX", "spotify:playlist:37i9dQZF1DWW2hj3ZtMbuO", "spotify:playlist:37i9dQZF1DX6xZZEgC9Ubl", "spotify:playlist:37i9dQZF1DX15JKV0q7shD", "spotify:playlist:37i9dQZF1DX1vEe0OWx8Fn"] # Sad
 }
 
 # Function to fetch random playlists based on genre code
