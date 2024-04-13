@@ -680,7 +680,7 @@ async def on_message(message):
                     }
                 user_scores[user_id]['pp'] += points_awarded
                 save_user_scores(user_scores)
-                await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+                await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
             else:
                 if voice_client and voice_client.is_connected():
                     await voice_client.disconnect()
@@ -762,7 +762,7 @@ async def on_message(message):
                     response_message += f"\nCongratulations, **{username}**! You guessed both correctly in **{attempts} attempt(s)!**"
                     response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
                     response_message += f"\nYou received **{10-attempts} coins**! *(10 - {attempts} attempts)*"
-                    response_message += f"\nYou currently have **{user_scores[uid]['pp']}** coins."
+                    response_message += f"\nYou currently have **{user_scores[user_id]['pp']}** coins."
                     ongoing_game.pop(message.channel.id, None)  # End the game after a correct guess
                 else:
                     if album_match:
@@ -810,7 +810,8 @@ async def on_message(message):
                     else:
                         user_scores[user_id]['pp'] += points_awarded
                     save_user_scores(user_scores)
-                    await message.channel.send(f"Correct! It was '{correct_song}' by '{', '.join(game_data['artist_names'])}'.")
+                    await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
+
                     ongoing_game.pop(message.channel.id)  # End the game for this channel
                 else:
                     # Incorrect guess
@@ -892,7 +893,7 @@ class LyricsGameSelect(discord.ui.Select):
     def __init__(self, playlists, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.playlists = playlists
-        self.placeholder = 'Select a playlist to start the lyrics game'
+        self.placeholder = 'Select a Spotify playlist'
         self.options = [
             discord.SelectOption(label=playlist['name'], value=playlist['id'])
             for playlist in playlists
@@ -930,7 +931,7 @@ class LyricsGameSelect(discord.ui.Select):
         }
 
         # Send the initial game message
-        await interaction.followup.send(f"**Lyrics Game Started!** Guess the song and artist from these lyrics:\n\n>>> {song.lyrics[:200]}...")
+        await interaction.followup.send(f"**Lyrics Game Started!** Guess the song and artist in the format of `[Song name] / [Artist]`:\n\n>>> {song.lyrics[:200]}...")
         
         # Start waiting for guesses with a timeout
         asyncio.create_task(wait_for_guess(interaction.channel_id))
