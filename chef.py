@@ -810,7 +810,7 @@ async def on_message(message):
                     else:
                         user_scores[user_id]['pp'] += points_awarded
                     save_user_scores(user_scores)
-                    await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
+                    await message.channel.send(f"{message.author.display_name} got the correct answer `{correct_song} / {correct_artists[0]}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
 
                     ongoing_game.pop(message.channel.id)  # End the game for this channel
                 else:
@@ -818,7 +818,7 @@ async def on_message(message):
                     game_data['attempts'] += 1
                     if game_data['attempts'] >= 2:
                         # Too many incorrect guesses
-                        await message.channel.send(f"Incorrect! The correct answer was '{correct_song}' by '{', '.join(game_data['artist_names'])}'.")
+                        await message.channel.send(f"Incorrect! The correct answer was `{correct_song} / {', '.join(game_data['artist_names'])}`.")
                         ongoing_game.pop(message.channel.id)  # Remove game state
                     else:
                         # Provide another chance
