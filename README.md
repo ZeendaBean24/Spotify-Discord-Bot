@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Spotify Chef Bot is a versatile Discord bot designed to enhance your music experience by integrating Spotify's rich library directly within Discord. It allows users to interact with various Spotify features through simple commands. This project was initiated as part of a school assignment *(IB Coding MYP Unit)* but quickly turned into a passion project due to my interest in both music and coding.
+Spotify Chef Bot, by **Zeen Liu (@zeendabean24)** and **Noah Chen (@ntcie)** is a versatile Discord bot designed to enhance your music experience by integrating Spotify's rich library directly within Discord. It allows users to interact with various Spotify features through simple commands. This project was initiated as part of a school assignment *(IB Coding MYP Unit)* but quickly turned into a passion project due to my interest in both music and coding.
 
 ## Features
 
