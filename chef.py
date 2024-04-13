@@ -508,6 +508,8 @@ class GuessGameSelect(discord.ui.Select):
         album_cover_url = selected_track['album']['images'][0]['url']
         artist_names = [artist['name'] for artist in selected_track['artists']]
 
+        print(f"Correct Answer: {album_name} / {', '.join(artist_names)}")
+
         # Store game data
         ongoing_game[interaction.channel_id] = {
             "game_type": "guess",
@@ -562,6 +564,9 @@ async def preview(ctx, genre_code: int = None):
         selected_track = random.choice(tracks)['track']
         track_name = selected_track['name']  # Extract the name of the track
         track_name = re.sub(r"\[.*?\]|\(.*?\)", "", track_name).strip()  # Clean the track name
+        artist_names = [artist['name'].lower() for artist in selected_track['artists']]
+
+        print(f"Correct Answer: {track_name} / {', '.join(artist_names)}")
 
         preview_url = selected_track['preview_url']
 
@@ -595,7 +600,7 @@ async def preview(ctx, genre_code: int = None):
             ongoing_game[ctx.channel.id] = {
                 "game_type": "preview",
                 "track_name": selected_track['name'].lower(),
-                "artist_names": [artist['name'].lower() for artist in selected_track['artists']],
+                "artist_names": artist_names,
                 "start_time": start_time,
                 "guild": ctx.guild,
                 "channel": ctx.channel
@@ -603,6 +608,7 @@ async def preview(ctx, genre_code: int = None):
 
             # Start a timer to end the game after 1 minute
             bot.loop.create_task(end_game_after_timeout(ctx.channel.id, 60))  # 60 seconds timeout
+
 
             await interaction.followup.send("Guess the song and artist! Type your answer in the format `[Track name] / [Artist]`.")
         else:
@@ -618,9 +624,8 @@ async def end_game_after_timeout(channel_id, timeout):
     await asyncio.sleep(timeout)
     game_data = ongoing_game.pop(channel_id, None)
     if game_data:
-        guild = game_data['guild']
         channel = game_data['channel']  # Get the stored channel object
-        voice_client = discord.utils.get(bot.voice_clients, guild=guild)
+        voice_client = discord.utils.get(bot.voice_clients)
         if voice_client and voice_client.is_connected():
             await voice_client.disconnect()
         await channel.send("Timed Out: Game Ended.")
