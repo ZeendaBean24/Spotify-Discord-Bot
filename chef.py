@@ -141,33 +141,37 @@ async def greet(ctx):
         ("Sveikas", "Lithuanian"),
     ]
     msg = random.choice(greetings)
-    await ctx.send(f"## {msg[0]}! ({msg[1]})")
+    await ctx.send(f"## 🌍 {msg[0]}! ({msg[1]}) 🍻")
 
 @bot.command()
 async def luckynumber(ctx):
     number = random.randint(1, 100)  # Random number between 1 and 100
-    await ctx.send(f"Your lucky number today is: {number}")
+    await ctx.send(f"🍀 Your lucky number today is: {number} 🍀")
 
 @bot.command()
 async def cmds(ctx):
     commands_list = [
         '\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*',
-        '## Overview',
+        '## Essentials',
         '',
-        '**`!cmds` - Lists all available commands**',
-        '**`!info` - Provides info about the bot**',
+        '**`!cmds` - Lists all available commands 🛠️**',
+        '**`!info` - Provides info about the bot 🛠️**',
         '## Basic Commands',
         '',
-        '`!greet` - Greet you with a random message',
-        '`!luckynumber` - Tells you a random lucky number',
+        "`!greet` - Greets you with a random message 🎈",
+        "`!luckynumber` - Tells you a random lucky number 🔢",
         '## Music Commands',
         '',
-        '**`!recent` - Displays the most recent Spotify track played**',
-        '**`!genres` - Shows the top genres in a Spotify playlist**',
-        '**`!popularity` - Analyzes the popularity of a Spotify playlist**',
-        '**`!randomsong` - Picks a random song from a Spotify playlist**',
-        '**`!guess` - Guessing game based on an album cover**',
-        '**`!preview` - Guessing game based on a song audio snippet (Voice call required)**',
+        "**`!recent` - Displays the most recent Spotify track played 🎵**",
+        "**`!genres` - Shows the top genres in a Spotify playlist 📊**",
+        "**`!popularity` - Analyzes the popularity of a Spotify playlist 🔝**",
+        "**`!randomsong` - Picks a random song from a Spotify playlist 🎲**",
+        "**`!guess` - Guessing game based on an album cover 🎤**",
+        "**`!preview` - Guessing game based on a song audio snippet (requires voice call) 🔊**",
+        "**`!blend` - Creates a blend of 50 tracks from your playlists 🎶**",
+        "**`!top` - Displays top users by coins 💰**",
+        "**`!uses` - Displays top users by command uses 📈**"
+        '',
         '',
         '\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*',
     ]
@@ -177,10 +181,12 @@ async def cmds(ctx):
 @bot.command()
 async def info(ctx):
     description = (
-        "## @zeendabean24 & @ntcie Present: *Spotify Chef Bot*\n\n"
-        "I will be your music buddy here on Discord!\n" 
+        "## @zeendabean24 & @ntcie Present: *Spotify Chef Bot* 🎵🤖\n\n"
+        "I'm here to enhance your music experience on Discord.\n"
         "I have many cool commands to connect you and your pals through music.\n\n"
-        "**Use the prefix **`!`** and **`!cmds`** to start!**"
+        "**Use the prefix `!` to interact with me.** Here's how you can start:\n"
+        "`!cmds` - Lists all commands available.\n\n"
+        "Let's have some fun with music together! 🎉"
     )
     await ctx.send(description)
 
