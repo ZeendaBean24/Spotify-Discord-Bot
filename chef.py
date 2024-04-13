@@ -869,7 +869,7 @@ class LyricsGameSelect(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        
+
         playlist_id = self.values[0]
         tracks = await fetch_all_playlist_tracks(playlist_id)
 
@@ -897,7 +897,25 @@ class LyricsGameSelect(discord.ui.Select):
         }
 
         # Send the initial game message
-        await interaction.followup.send(f"**Lyrics Game Started!** Guess the song and artist from these lyrics:\n\n>>> {song.lyrics[:200]}...")
+        message = await interaction.followup.send(f"**Lyrics Game Started!** Guess the song and artist from these lyrics:\n\n>>> {song.lyrics[:200]}...")
+        
+        # Start waiting for guesses
+        asyncio.create_task(wait_for_guess(interaction.channel, song.title, [artist['name'] for artist in random_track['artists']], message))
+
+async def wait_for_guess(channel, correct_song, correct_artists, message):
+    def check(m):
+        return m.channel == channel and not m.author.bot
+
+    try:
+        guess_message = await bot.wait_for('message', timeout=30.0, check=check)
+        guess = guess_message.content.lower().strip()
+        if correct_song.lower() in guess and any(artist.lower() in guess for artist in correct_artists):
+            await channel.send("Correct! Well done.")
+        else:
+            await channel.send(f"Incorrect! The correct answer was '{correct_song}' by '{', '.join(correct_artists)}'.")
+    except asyncio.TimeoutError:
+        await channel.send(f"Time's up! The correct answer was '{correct_song}' by '{', '.join(correct_artists)}'.")
+        ongoing_game.pop(message.channel.id, None)  # Clean up the game state
 
 class LyricsGameView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
