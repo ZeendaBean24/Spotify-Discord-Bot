@@ -897,10 +897,10 @@ class LyricsGameSelect(discord.ui.Select):
         }
 
         # Send the initial game message
-        message = await interaction.followup.send(f"**Lyrics Game Started!** Guess the song and artist from these lyrics:\n\n>>> {song.lyrics[:200]}...")
+        await interaction.followup.send(f"**Lyrics Game Started!** Guess the song and artist from these lyrics:\n\n>>> {song.lyrics[:200]}...")
         
-        # Start waiting for guesses
-        asyncio.create_task(wait_for_guess(interaction.channel, song.title, [artist['name'] for artist in random_track['artists']], message))
+        # Start waiting for guesses with a timeout
+        asyncio.create_task(wait_for_guess(interaction.channel_id))
 
 async def wait_for_guess(channel, correct_song, correct_artists, message):
     def check(m):
