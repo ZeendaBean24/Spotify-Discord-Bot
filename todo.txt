@@ -1,0 +1,42 @@
+TODO
+- [ONGOING] Update !cmds - (which commands are single-layer, which are multiplayer)
+- Slash commands
+- Shortcuts for choosing playlists instead of manually having to click on the dropdown menu
+- Wait time for genres command; 
+	- Minigames
+	- Did you know? (Facts) 
+- Cooldown to avoid spamming 
+- Emojis (coins, right, wrong, leaderboard - star...)
+- Upgrades (coins, by with coins)
+- Better command names
+
+
+Unique features
+- AI generate music, guess the prompts used
+- Use Spotify's playlists, public playlists instead of the user's playlists? 	
+	- Add a guide (on the parameters)   
+	- Countries
+	- Provide info for all the playlists used  
+	- Remove duplicates in random 3
+	- Add mixes (except for pop mix - already added)
+	- ADD PLAYLIST AUTHOR (such as by Spotify?)
+- For guess and preview command
+	- Again (instead of exit) to go again, with same parameters  
+- News command (breaking news for music)
+- Which artist is popular [unimplemented]
+- 2 songs: guess which one is / more popular, short snippet? Which one is longer, 
+- Make a blend (blend a playlist with a genre)
+
+
+Public Commands 
+- cannot use other commands while one public command is at play (ongoing game)
+- guess
+	- make it more of a guessing game immersive : number of songs, what are the tracks, 
+- lyrics
+	- When searching for [Chorus] tag, just search for the words, because some of them are like 		[Chorus/Drop], etc. as long as it has the word [chorus]
+- preview
+	- each person has 1 try (don't disconnect if wrong because others can still guess) 
+- [All commands] At the end of each game, print out each person who participated, how many attempts they took
+- [All commands] Solo and multiplayer -  hangman sort of game (more visual)
+ 
+

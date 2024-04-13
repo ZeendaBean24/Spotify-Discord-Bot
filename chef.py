@@ -1006,7 +1006,7 @@ async def p(ctx):
         "- `3`: **Indie/Rock** (Everything from underground rock to indie gems! 🎸)\n"
         "- `4`: **Classical/Lofi/Jazz** (Relaxing tunes perfect for studying or winding down. ☕)\n"
         "- `5`: **Sad** (Songs to accompany introspective or blue moments. 💧)\n"
-        "Just enter the genre code as an integer after the command, and ta-da! 🌟"
+        "**Just enter the genre code as an integer after the command, and ta-da!** 🌟"
     )
     await ctx.send(explanation)
     
