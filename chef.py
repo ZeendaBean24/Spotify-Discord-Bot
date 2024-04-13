@@ -680,12 +680,12 @@ async def on_message(message):
                     }
                 user_scores[user_id]['pp'] += points_awarded
                 save_user_scores(user_scores)
-                await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
+                await message.channel.send(f"{message.author.display_name} got the correct answer `{track_name} / {', '.join(artist_names)}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
             else:
                 if voice_client and voice_client.is_connected():
                     await voice_client.disconnect()
                 correct_artist = artist_names[0]
-                await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {correct_artist}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+                await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {', '.join(artist_names)}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
 
         # Handling for the album guessing game
         elif game_type == 'guess':
@@ -810,7 +810,7 @@ async def on_message(message):
                     else:
                         user_scores[user_id]['pp'] += points_awarded
                     save_user_scores(user_scores)
-                    await message.channel.send(f"{message.author.display_name} got the correct answer `{correct_song} / {correct_artists[0]}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
+                    await message.channel.send(f"{message.author.display_name} got the correct answer `{correct_song} / {', '.join(correct_artists)}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
 
                     ongoing_game.pop(message.channel.id)  # End the game for this channel
                 else:
@@ -818,7 +818,7 @@ async def on_message(message):
                     game_data['attempts'] += 1
                     if game_data['attempts'] >= 2:
                         # Too many incorrect guesses
-                        await message.channel.send(f"Incorrect! The correct answer was `{correct_song} / {', '.join(game_data['artist_names'])}`.")
+                        await message.channel.send(f"Incorrect! The correct answer was `{correct_song} / {', '.join(correct_artists)}`.")
                         ongoing_game.pop(message.channel.id)  # Remove game state
                     else:
                         # Provide another chance
