@@ -636,6 +636,8 @@ async def on_message(message):
     game_data = ongoing_game.get(message.channel.id)
 
     channel_id = message.channel.id
+    current_user = sp.current_user()
+    uid = current_user['id'] 
 
     if game_data:
         voice_client = discord.utils.get(bot.voice_clients, guild=message.guild)
