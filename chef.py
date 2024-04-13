@@ -635,9 +635,11 @@ async def on_message(message):
     # Check if there's an ongoing game in this channel
     game_data = ongoing_game.get(message.channel.id)
 
+    user = message.author
     channel_id = message.channel.id
     current_user = sp.current_user()
-    uid = current_user['id'] 
+    user_id = str(user.id)
+    username = user.name
 
     if game_data:
         voice_client = discord.utils.get(bot.voice_clients, guild=message.guild)
@@ -670,15 +672,13 @@ async def on_message(message):
                 if voice_client and voice_client.is_connected():
                     await voice_client.disconnect()
                 user_scores = load_user_scores()
-                uid = str(uid)
-                if not uid in user_scores.keys():
-                    user_scores[uid] = {
+                if not user_id in user_scores.keys():
+                    user_scores[user_id] = {
                         "username": username,
                         "pp": 0,
                         "uses": 0,
                     }
-                else:
-                    user_scores[uid]['pp'] += points_awarded
+                user_scores[user_id]['pp'] += points_awarded
                 save_user_scores(user_scores)
                 await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
             else:
@@ -749,18 +749,15 @@ async def on_message(message):
                 response_message += f"Attempt {attempts} *({10 - attempts} attempt(s) left)*: "
 
                 if album_match and artist_match:
-                    user = message.author
-                    uid = user.id
                     username = user.name
                     user_scores = load_user_scores()
-                    uid = str(uid)
-                    if not uid in user_scores.keys():
-                        user_scores[uid] = {
+                    if not user_id in user_scores.keys():
+                        user_scores[user_id] = {
                             "username": username,
                             "pp": 0,
                             "uses": 0
                         }
-                    user_scores[uid]['pp'] += 10-attempts
+                    user_scores[user_id]['pp'] += 10-attempts
                     save_user_scores(user_scores)
                     response_message += f"\nCongratulations, **{username}**! You guessed both correctly in **{attempts} attempt(s)!**"
                     response_message += f"\nThe correct answer was `{album_name} / {', '.join(artist_names)}`."
@@ -804,15 +801,14 @@ async def on_message(message):
                 if correct_song in guess and any(artist in guess for artist in correct_artists):
                     # Correct guess
                     user_scores = load_user_scores()
-                    uid = str(uid)
-                    if not uid in user_scores.keys():
-                        user_scores[uid] = {
+                    if not user_id in user_scores.keys():
+                        user_scores[user_id] = {
                             "username": username,
                             "pp": 0,
                             "uses": 0,
                         }
                     else:
-                        user_scores[uid]['pp'] += points_awarded
+                        user_scores[user_id]['pp'] += points_awarded
                     save_user_scores(user_scores)
                     await message.channel.send(f"Correct! It was '{correct_song}' by '{', '.join(game_data['artist_names'])}'.")
                     ongoing_game.pop(message.channel.id)  # End the game for this channel
