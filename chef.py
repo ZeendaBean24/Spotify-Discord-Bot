@@ -902,7 +902,7 @@ class LyricsGameSelect(discord.ui.Select):
         # Start waiting for guesses with a timeout
         asyncio.create_task(wait_for_guess(interaction.channel_id))
 
-async def wait_for_guess(channel_id, timeout=10):
+async def wait_for_guess(channel_id, timeout=30):
     await asyncio.sleep(timeout)  # Simply wait for the timeout period
     if channel_id in ongoing_game:
         channel = bot.get_channel(channel_id)
