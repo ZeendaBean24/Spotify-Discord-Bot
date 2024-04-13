@@ -868,6 +868,8 @@ class LyricsGameSelect(discord.ui.Select):
         ]
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        
         playlist_id = self.values[0]
         tracks = await fetch_all_playlist_tracks(playlist_id)
 
