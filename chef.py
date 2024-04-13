@@ -902,20 +902,13 @@ class LyricsGameSelect(discord.ui.Select):
         # Start waiting for guesses with a timeout
         asyncio.create_task(wait_for_guess(interaction.channel_id))
 
-async def wait_for_guess(channel, correct_song, correct_artists, message):
-    def check(m):
-        return m.channel == channel and not m.author.bot
+async def wait_for_guess(channel_id, timeout=10):
+    await asyncio.sleep(timeout)  # Simply wait for the timeout period
+    if channel_id in ongoing_game:
+        channel = bot.get_channel(channel_id)
+        await channel.send("Time's up! Better luck next time.")
+        ongoing_game.pop(channel_id, None)  # Remove the game state after timeout
 
-    try:
-        guess_message = await bot.wait_for('message', timeout=30.0, check=check)
-        guess = guess_message.content.lower().strip()
-        if correct_song.lower() in guess and any(artist.lower() in guess for artist in correct_artists):
-            await channel.send("Correct! Well done.")
-        else:
-            await channel.send(f"Incorrect! The correct answer was '{correct_song}' by '{', '.join(correct_artists)}'.")
-    except asyncio.TimeoutError:
-        await channel.send(f"Time's up! The correct answer was '{correct_song}' by '{', '.join(correct_artists)}'.")
-        ongoing_game.pop(message.channel.id, None)  # Clean up the game state
 
 class LyricsGameView(discord.ui.View):
     def __init__(self, playlists, *args, **kwargs):
