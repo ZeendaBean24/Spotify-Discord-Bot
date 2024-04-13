@@ -816,9 +816,9 @@ async def on_message(message):
                 else:
                     # Incorrect guess
                     game_data['attempts'] += 1
-                    if game_data['attempts'] >= 3:
+                    if game_data['attempts'] >= 2:
                         # Too many incorrect guesses
-                        await message.channel.send(f"No more attempts left! The correct answer was '{correct_song}' by '{', '.join(game_data['artist_names'])}'.")
+                        await message.channel.send(f"Incorrect! The correct answer was '{correct_song}' by '{', '.join(game_data['artist_names'])}'.")
                         ongoing_game.pop(message.channel.id)  # Remove game state
                     else:
                         # Provide another chance
@@ -930,8 +930,17 @@ class LyricsGameSelect(discord.ui.Select):
             "attempts": 0
         }
 
-        # Send the initial game message
-        await interaction.followup.send(f"**Lyrics Game Started!** Guess the song and artist in the format of `[Song name] / [Artist]`:\n\n>>> {song.lyrics[:200]}...")
+        lyrics = song.lyrics.split('\n')
+        line_counts = {}
+        for line in lyrics[1:][:-1]:
+            if line.strip():
+                if not '[' in line and not ']' in line and not '(' in line and not ')' in line:
+                    if track_name in line:
+                        line_counts[line] = line_counts.get(line, 0) + 2
+                    else:
+                        line_counts[line] = line_counts.get(line, 0) + 1
+        best_line = max(line_counts, key=line_counts.get)
+        await interaction.followup.send(f"**30 Seconds! Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> ## {best_line}")
         
         # Start waiting for guesses with a timeout
         asyncio.create_task(wait_for_guess(interaction.channel_id))
