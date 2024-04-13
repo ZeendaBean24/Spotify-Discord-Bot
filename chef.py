@@ -914,7 +914,6 @@ class LyricsGameSelect(discord.ui.Select):
             await interaction.response.send_message("The selected playlist is empty.")
             return
 
-        # Choose a random track
         random_track = random.choice(tracks)['track']
         track_name = re.sub(r"\[.*?\]|\(.*?\)", "", random_track['name']).strip()
         genius = lyricsgenius.Genius(genius_api_token)
@@ -924,7 +923,6 @@ class LyricsGameSelect(discord.ui.Select):
             await interaction.response.send_message("Failed to fetch lyrics. Try another track.")
             return
 
-        # Set up the ongoing game data
         start_time = time.time()
         ongoing_game[interaction.channel_id] = {
             "game_type": "lyrics",
@@ -935,18 +933,25 @@ class LyricsGameSelect(discord.ui.Select):
             "attempts": 0
         }
 
-        lyrics = song.lyrics.split('\n')
-        line_counts = {}
-        for line in lyrics[1:][:-1]:
-            if line.strip():
-                if not '[' in line and not ']' in line and not '(' in line and not ')' in line:
-                    if track_name in line:
-                        line_counts[line] = line_counts.get(line, 0) + 2
-                    else:
-                        line_counts[line] = line_counts.get(line, 0) + 1
-        best_line = max(line_counts, key=line_counts.get)
-        await interaction.followup.send(f"**30 Seconds! Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> ## {best_line}")
-        
+        # Find the chorus
+        lyrics_lines = song.lyrics.split('\n')
+        chorus_index = -1
+        for i, line in enumerate(lyrics_lines):
+            if '[chorus]' in line.lower():  # Assuming the chorus tag is denoted this way
+                chorus_index = i + 1  # The index of the line after the chorus tag
+                break
+
+        if chorus_index != -1 and chorus_index + 4 < len(lyrics_lines):
+            selected_lines = lyrics_lines[chorus_index:chorus_index + 4]  # Get the next 4 lines after the chorus tag
+        else:
+            # If no chorus or not enough lines after chorus, pick 4 lines from the middle
+            middle_index = len(lyrics_lines) // 2
+            selected_lines = lyrics_lines[middle_index:middle_index + 4]
+
+        selected_section = "\n".join(selected_lines).strip()
+
+        await interaction.followup.send(f"**30 Seconds! Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> ## {selected_section}")
+
         # Start waiting for guesses with a timeout
         asyncio.create_task(wait_for_guess(interaction.channel_id))
 
