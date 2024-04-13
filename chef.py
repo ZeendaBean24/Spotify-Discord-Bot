@@ -156,6 +156,7 @@ async def cmds(ctx):
         '',
         '**`!cmds` - Lists all available commands 🛠️**',
         '**`!info` - Provides info about the bot 🛠️**',
+        '**`!p` - Reference for playlist selection 🛠️**',
         '## Basic Commands',
         '',
         "`!greet` - Greets you with a random message 🎈",
@@ -422,6 +423,7 @@ async def popularity(ctx, genre_code: int = None):
         await ctx.send("Fetch didn't work. Try again.")
         return
 
+    await ctx.send("**If you haven't, type in `!p` for reference on how playlist selection works.**")
     await ctx.send("Select a Spotify playlist to analyze popularity:", view=PopularityView(playlists=playlists))
 
 @bot.command()
@@ -436,6 +438,7 @@ async def randomsong(ctx, genre_code: int = None):
         await ctx.send("Fetch didn't work. Try again.")
         return
 
+    await ctx.send("**If you haven't, type in `!p` for reference on how playlist selection works.**")
     await ctx.send("Select a Spotify playlist:", view=SongPlaylistView(playlists=playlists))
 
 class RandomSongSelect(discord.ui.Select):
@@ -491,6 +494,7 @@ async def guess(ctx, genre_code: int = None):
         await ctx.send("Fetch didn't work. Try again.")
         return
 
+    await ctx.send("**If you haven't, type in `!p` for reference on how playlist selection works.**")
     await ctx.send("Select a Spotify playlist:", view=GuessPlaylistView(playlists=playlists))
 
 class GuessGameSelect(discord.ui.Select):
@@ -554,6 +558,7 @@ async def preview(ctx, genre_code: int = None):
         await ctx.send("Fetch didn't work. Try again.")
         return
 
+    await ctx.send("**If you haven't, type in `!p` for reference on how playlist selection works.**")
     select = discord.ui.Select(placeholder="Choose your playlist",
                                options=[discord.SelectOption(label=playlist['name'], value=playlist['id'])
                                         for playlist in playlists])
@@ -981,6 +986,7 @@ async def lyrics(ctx, genre_code: int = None):
         await ctx.send("No suitable playlists found.")
         return
 
+    await ctx.send("**If you haven't, type in `!p` for reference on how playlist selection works.**")
     await ctx.send("Select a playlist for the lyrics game:", view=LyricsGameView(playlists=playlists))
 
 bot.run(os.getenv("DISCORD_TOKEN"))
