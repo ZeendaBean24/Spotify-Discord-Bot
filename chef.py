@@ -989,4 +989,26 @@ async def lyrics(ctx, genre_code: int = None):
     await ctx.send("**If you haven't, type in `!p` for reference on how playlist selection works.**")
     await ctx.send("Select a playlist for the lyrics game:", view=LyricsGameView(playlists=playlists))
 
+@bot.command()
+async def p(ctx):
+    # Message explaining the playlist selection process
+    explanation = (
+        "**Understanding Playlist Selection** 🎶🔍\n\n"
+        "When you request music, here's how we pick the playlists:\n"
+        "1. **Pool of Playlists:** We have a curated list of Spotify playlists.\n"
+        "2. **Genre Codes:** You can choose a genre to narrow down the selection or leave it random.\n"
+        "3. **Playlist Selection:** Depending on the genre code you enter (or none for random), we select 3 playlists from the pool.\n\n"
+        "**Genre Codes Explained:** 🗂️\n"
+        "Here’s a bit more about each genre code:\n"
+        "- `0`: **Special Series** (Multiple genres combined, perfect for discovering new music! 🌟)\n"
+        "- `1`: **Pop** (Catchy and upbeat, from top charts! 🎤)\n"
+        "- `2`: **Rap/Hip-Hop/Phonk** (Beats and rhymes from the streets and beyond! 🚗)\n"
+        "- `3`: **Indie/Rock** (Everything from underground rock to indie gems! 🎸)\n"
+        "- `4`: **Classical/Lofi/Jazz** (Relaxing tunes perfect for studying or winding down. ☕)\n"
+        "- `5`: **Sad** (Songs to accompany introspective or blue moments. 💧)\n"
+        "Just enter the genre code as an integer after the command, and ta-da! 🌟"
+    )
+    await ctx.send(explanation)
+    
+
 bot.run(os.getenv("DISCORD_TOKEN"))
