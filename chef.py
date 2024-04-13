@@ -948,9 +948,9 @@ class LyricsGameSelect(discord.ui.Select):
             middle_index = len(lyrics_lines) // 2
             selected_lines = lyrics_lines[middle_index:middle_index + 4]
 
-        selected_section = "\n".join(selected_lines).strip()
+        selected_section = '\n'.join(f"### {line}" for line in selected_lines if line.strip())
 
-        await interaction.followup.send(f"**30 Seconds! Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> ## {selected_section}")
+        await interaction.followup.send(f"**30 Seconds! Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> {selected_section}")
 
         # Start waiting for guesses with a timeout
         asyncio.create_task(wait_for_guess(interaction.channel_id))
