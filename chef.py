@@ -657,12 +657,27 @@ async def on_message(message):
             end_time = time.time()
             time_taken = end_time - game_data['start_time']
             time_taken_ms = int((time_taken % 1) * 1000)
+            max_time = 30  # Max time in seconds to earn points
+            max_points = 15  # Maximum points possible
+            min_points = 3  # Minimum points
+            points_awarded = max(int(max_points - (time_taken / max_time * max_points)), min_points)
 
             ongoing_game.pop(message.channel.id, None)  # End the game after one guess
 
             if guessed_track == track_name and guessed_artist in artist_names:
                 if voice_client and voice_client.is_connected():
                     await voice_client.disconnect()
+                user_scores = load_user_scores()
+                uid = str(uid)
+                if not uid in user_scores.keys():
+                    user_scores[uid] = {
+                        "username": username,
+                        "pp": 0,
+                        "uses": 0,
+                    }
+                else:
+                    user_scores[uid]['pp'] += points_awarded
+                save_user_scores(user_scores)
                 await message.channel.send(f"{message.author.display_name} got the correct answer `{guessed_track} / {guessed_artist}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
             else:
                 if voice_client and voice_client.is_connected():
@@ -770,6 +785,14 @@ async def on_message(message):
                 await message.channel.send(response_message)
 
         elif game_data['game_type'] == 'lyrics':
+                end_time = time.time()
+                time_taken = end_time - game_data['start_time']
+                time_taken_ms = int((time_taken % 1) * 1000)
+                max_time = 30  # Max time in seconds to earn points
+                max_points = 15  # Maximum points possible
+                min_points = 3  # Minimum points
+                points_awarded = max(int(max_points - (time_taken / max_time * max_points)), min_points)
+
                 # User is trying to guess the song based on lyrics provided
                 guess = message.content.lower().strip()
                 correct_song = game_data['song_name'].lower()
@@ -778,7 +801,17 @@ async def on_message(message):
                 # Checking user's guess against correct song and artist
                 if correct_song in guess and any(artist in guess for artist in correct_artists):
                     # Correct guess
-                    update_user_stats(message.author)  # Update stats such as guesses, wins etc.
+                    user_scores = load_user_scores()
+                    uid = str(uid)
+                    if not uid in user_scores.keys():
+                        user_scores[uid] = {
+                            "username": username,
+                            "pp": 0,
+                            "uses": 0,
+                        }
+                    else:
+                        user_scores[uid]['pp'] += points_awarded
+                    save_user_scores(user_scores)
                     await message.channel.send(f"Correct! It was '{correct_song}' by '{', '.join(game_data['artist_names'])}'.")
                     ongoing_game.pop(message.channel.id)  # End the game for this channel
                 else:
@@ -888,10 +921,12 @@ class LyricsGameSelect(discord.ui.Select):
             return
 
         # Set up the ongoing game data
+        start_time = time.time()
         ongoing_game[interaction.channel_id] = {
             "game_type": "lyrics",
             "song_name": song.title,
             "artist_names": [artist['name'] for artist in random_track['artists']],
+            "start_time": start_time,
             "lyrics": song.lyrics,
             "attempts": 0
         }
@@ -923,74 +958,5 @@ async def lyrics(ctx, genre_code: int = None):
         return
 
     await ctx.send("Select a playlist for the lyrics game:", view=LyricsGameView(playlists=playlists))
-
-# @bot.command()
-# async def lyrics(ctx):
-#     current_user = sp.current_user()
-#     uid = current_user['id'] 
-#     playlists = sp.current_user_playlists(limit=50)['items']  # Increase limit if necessary
-#     own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == uid]  # Filter for user's own playlists
-#     if not own_playlists:
-#         await ctx.send("u don't have any public playlists :(")
-#         return
-#     all_tracks = []
-#     for playlist in own_playlists:
-#         tracks = await fetch_all_playlist_tracks(playlist['id'])
-#         all_tracks.extend(tracks)
-#     random_track = random.choice(all_tracks)
-#     genius = lyricsgenius.Genius(genius_api_token)
-#     track_name = re.sub(r"\[.*?\]|\(.*?\)", "", random_track['track']['name']).strip()
-#     song = genius.search_song(track_name, random_track['track']['artists'][0]['name'])
-#     if not song:
-#         await ctx.send(f"Could not fetch the lyrics of the song **{track_name}** by **{random_track['track']['artists'][0]['name']}** :( please reroll command")
-#         return
-#     lyrics = song.lyrics.split('\n')
-#     line_counts = {}
-#     for line in lyrics[1:][:-1]:
-#         if line.strip():
-#             if not '[' in line and not ']' in line and not '(' in line and not ')' in line:
-#                 if track_name in line:
-#                     line_counts[line] = line_counts.get(line, 0) + 2
-#                 else:
-#                     line_counts[line] = line_counts.get(line, 0) + 1
-#     best_line = max(line_counts, key=line_counts.get)
-#     await ctx.send(f"**30 Seconds! Guess the song name and artist of this verse!**\nType your guess in this format: `[Song name] / [Artist]`!\n\n>>> ## {best_line}")
-#     try:
-#         user_guess = await bot.wait_for('message', timeout=30)
-#         user = user_guess.author
-#         uid = user.id
-#         username = user.name
-#     except asyncio.TimeoutError:
-#         await ctx.send(f"womp womp time's up. The correct answer is **{random_track['track']['name']}** by **{random_track['track']['artists'][0]['name']}**.")
-#         return
-#     if user_guess.content.lower().replace(' ', '').split('/') == [track_name.replace(' ', '').lower(), random_track['track']['artists'][0]['name'].replace(' ', '').lower()]:
-#         user_scores = load_user_scores()
-#         uid = str(uid)
-#         if not uid in user_scores.keys():
-#             user_scores[uid] = {
-#                 "username": username,
-#                 "pp": 0,
-#                 "uses": 0
-#             }
-#         else:
-#             user_scores[uid]['pp'] += 1
-#         save_user_scores(user_scores)
-#         await ctx.send(f"GG **{username}**! Your guess is correct. You get **1** coin. You currently have **{user_scores[uid]['pp']}** coins.")
-#         return
-#     else:
-#         await ctx.send(f"womp womp you are incorrect. The correct answer is `{random_track['track']['name']} / {random_track['track']['artists'][0]['name']}`.")
-#         return
-
-# user_scores = load_user_scores()
-#         uid = str(uid)
-#         if not uid in user_scores.keys():
-#             user_scores[uid] = {
-#                 "username": username,
-#                 "pp": 0,
-#                 "uses": 0
-#             }
-#         else:
-#             user_scores[uid]['pp'] += 1
-#         save_user_scores(user_scores)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
