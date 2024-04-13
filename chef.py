@@ -662,7 +662,7 @@ async def on_message(message):
             time_taken = end_time - game_data['start_time']
             time_taken_ms = int((time_taken % 1) * 1000)
             max_time = 30  # Max time in seconds to earn points
-            max_points = 15  # Maximum points possible
+            max_points = 30  # Maximum points possible
             min_points = 3  # Minimum points
             points_awarded = max(int(max_points - (time_taken / max_time * max_points)), min_points)
 
@@ -788,7 +788,7 @@ async def on_message(message):
                 time_taken = end_time - game_data['start_time']
                 time_taken_ms = int((time_taken % 1) * 1000)
                 max_time = 30  # Max time in seconds to earn points
-                max_points = 15  # Maximum points possible
+                max_points = 30  # Maximum points possible
                 min_points = 3  # Minimum points
                 points_awarded = max(int(max_points - (time_taken / max_time * max_points)), min_points)
 
