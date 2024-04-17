@@ -4,14 +4,14 @@ from discord.ext import commands
 from dotenv import load_dotenv
 # import urllib.parse
 
-# Load the Opus library
-opus_path = '/opt/homebrew/lib/libopus.dylib'  # apk add --no-cache opus-dev
-discord.opus.load_opus(opus_path)
+# # Load the Opus library
+# opus_path = '/opt/homebrew/lib/libopus.dylib'  # apk add --no-cache opus-dev
+# discord.opus.load_opus(opus_path)
 
-if discord.opus.is_loaded():
-    print("Opus successfully loaded.")
-else:
-    print("Failed to load Opus.")
+# if discord.opus.is_loaded():
+#     print("Opus successfully loaded.")
+# else:
+#     print("Failed to load Opus.")
 
 # Set the locale to the user's default setting (for number formatting)
 locale.setlocale(locale.LC_ALL, '')
@@ -545,91 +545,91 @@ class GuessPlaylistView(discord.ui.View):
 # Global dictionary to track ongoing game by channel
 ongoing_game = {}
 
-@bot.command()
-async def preview(ctx, genre_code: int = None):
+# @bot.command()
+# async def preview(ctx, genre_code: int = None):
     
-    playlists = fetch_playlists_by_genre(genre_code)
+#     playlists = fetch_playlists_by_genre(genre_code)
     
-    # user_id = sp.current_user()['id']
-    # playlists = sp.current_user_playlists(limit=50)['items']
-    # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
+#     # user_id = sp.current_user()['id']
+#     # playlists = sp.current_user_playlists(limit=50)['items']
+#     # own_playlists = [playlist for playlist in playlists if playlist['owner']['id'] == user_id]
 
-    if not playlists:
-        await ctx.send("Fetch didn't work. Try again.")
-        return
+#     if not playlists:
+#         await ctx.send("Fetch didn't work. Try again.")
+#         return
 
-    await ctx.send("**If you haven't, type in `!p` for reference on how playlist selection works.**")
-    select = discord.ui.Select(placeholder="Choose your playlist",
-                               options=[discord.SelectOption(label=playlist['name'], value=playlist['id'])
-                                        for playlist in playlists])
+#     await ctx.send("**If you haven't, type in `!p` for reference on how playlist selection works.**")
+#     select = discord.ui.Select(placeholder="Choose your playlist",
+#                                options=[discord.SelectOption(label=playlist['name'], value=playlist['id'])
+#                                         for playlist in playlists])
 
-    async def select_callback(interaction):
-        await interaction.response.defer()
-        playlist_id = select.values[0]
-        tracks = await fetch_all_playlist_tracks(playlist_id)
+#     async def select_callback(interaction):
+#         await interaction.response.defer()
+#         playlist_id = select.values[0]
+#         tracks = await fetch_all_playlist_tracks(playlist_id)
 
-        if not tracks:
-            await interaction.followup.send("The selected playlist is empty.")
-            return
+#         if not tracks:
+#             await interaction.followup.send("The selected playlist is empty.")
+#             return
 
-        selected_track = random.choice(tracks)['track']
-        track_name = selected_track['name']  # Extract the name of the track
-        track_name = re.sub(r"\[.*?\]|\(.*?\)", "", track_name).strip()  # Clean the track name
-        artist_names = [artist['name'].lower() for artist in selected_track['artists']]
+#         selected_track = random.choice(tracks)['track']
+#         track_name = selected_track['name']  # Extract the name of the track
+#         track_name = re.sub(r"\[.*?\]|\(.*?\)", "", track_name).strip()  # Clean the track name
+#         artist_names = [artist['name'].lower() for artist in selected_track['artists']]
 
-        print(f"Correct Answer: {track_name} / {', '.join(artist_names)}")
+#         print(f"Correct Answer: {track_name} / {', '.join(artist_names)}")
 
-        preview_url = selected_track['preview_url']
+#         preview_url = selected_track['preview_url']
 
-        if preview_url is None:
-            await interaction.followup.send("Preview not available for the selected track.")
-            return
+#         if preview_url is None:
+#             await interaction.followup.send("Preview not available for the selected track.")
+#             return
         
-        # Check if the author is in a guild (server)
-        if ctx.guild is None:
-            await ctx.send("You must use this command in a voice channel in a server!")
-            return
+#         # Check if the author is in a guild (server)
+#         if ctx.guild is None:
+#             await ctx.send("You must use this command in a voice channel in a server!")
+#             return
     
-        if ctx.author.voice and ctx.author.voice.channel:
-            channel = ctx.author.voice.channel
-            voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+#         if ctx.author.voice and ctx.author.voice.channel:
+#             channel = ctx.author.voice.channel
+#             voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
 
-            ffmpeg_options = {
-                'options': '-t 30'  # Play for 30 seconds
-            }
+#             ffmpeg_options = {
+#                 'options': '-t 30'  # Play for 30 seconds
+#             }
 
-            if voice_client and voice_client.is_connected():
-                await voice_client.move_to(channel)
-            else:
-                voice_client = await channel.connect()
+#             if voice_client and voice_client.is_connected():
+#                 await voice_client.move_to(channel)
+#             else:
+#                 voice_client = await channel.connect()
 
-            audio_source = discord.FFmpegPCMAudio(preview_url, **ffmpeg_options)
-            volume_adjusted_source = discord.PCMVolumeTransformer(audio_source, volume=0.25)  # 25% volume
-            voice_client.play(volume_adjusted_source, after=lambda e: bot.loop.create_task(voice_client.disconnect()))
+#             audio_source = discord.FFmpegPCMAudio(preview_url, **ffmpeg_options)
+#             volume_adjusted_source = discord.PCMVolumeTransformer(audio_source, volume=0.25)  # 25% volume
+#             voice_client.play(volume_adjusted_source, after=lambda e: bot.loop.create_task(voice_client.disconnect()))
 
-            start_time = time.time()
-            ongoing_game[ctx.channel.id] = {
-                "game_type": "preview",
-                "track_name": selected_track['name'].lower(),
-                "artist_names": artist_names,
-                "start_time": start_time,
-                "guild": ctx.guild,
-                "channel": ctx.channel
-            }
+#             start_time = time.time()
+#             ongoing_game[ctx.channel.id] = {
+#                 "game_type": "preview",
+#                 "track_name": selected_track['name'].lower(),
+#                 "artist_names": artist_names,
+#                 "start_time": start_time,
+#                 "guild": ctx.guild,
+#                 "channel": ctx.channel
+#             }
 
-            # Start a timer to end the game after 1 minute
-            bot.loop.create_task(end_game_after_timeout(ctx.channel.id, 60))  # 60 seconds timeout
+#             # Start a timer to end the game after 1 minute
+#             bot.loop.create_task(end_game_after_timeout(ctx.channel.id, 60))  # 60 seconds timeout
 
 
-            await interaction.followup.send("Guess the song and artist! Type your answer in the format `[Track name] / [Artist]`.")
-        else:
-            await interaction.followup.send("You are not connected to a voice channel.")
+#             await interaction.followup.send("Guess the song and artist! Type your answer in the format `[Track name] / [Artist]`.")
+#         else:
+#             await interaction.followup.send("You are not connected to a voice channel.")
 
-    select.callback = select_callback
+#     select.callback = select_callback
 
-    view = discord.ui.View()
-    view.add_item(select)
-    await ctx.send("Select a Spotify playlist:", view=view)
+#     view = discord.ui.View()
+#     view.add_item(select)
+#     await ctx.send("Select a Spotify playlist:", view=view)
 
 async def end_game_after_timeout(channel_id, timeout):
     await asyncio.sleep(timeout)
@@ -669,42 +669,42 @@ async def on_message(message):
 
         game_type = game_data.get('game_type')
         
-        if game_type == 'preview':
-            guess = message.content.lower().strip()
-            track_name, artist_names = game_data['track_name'], game_data['artist_names']
-            guessed_track, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
+        # if game_type == 'preview':
+        #     guess = message.content.lower().strip()
+        #     track_name, artist_names = game_data['track_name'], game_data['artist_names']
+        #     guessed_track, guessed_artist = (guess.split(' / ') + ["", ""])[:2]
 
-            end_time = time.time()
-            time_taken = end_time - game_data['start_time']
-            time_taken_ms = int((time_taken % 1) * 1000)
-            max_time = 30  # Max time in seconds to earn points
-            max_points = 30  # Maximum points possible
-            min_points = 3  # Minimum points
-            points_awarded = max(int(max_points - (time_taken / max_time * max_points)), min_points)
+        #     end_time = time.time()
+        #     time_taken = end_time - game_data['start_time']
+        #     time_taken_ms = int((time_taken % 1) * 1000)
+        #     max_time = 30  # Max time in seconds to earn points
+        #     max_points = 30  # Maximum points possible
+        #     min_points = 3  # Minimum points
+        #     points_awarded = max(int(max_points - (time_taken / max_time * max_points)), min_points)
 
-            ongoing_game.pop(message.channel.id, None)  # End the game after one guess
+        #     ongoing_game.pop(message.channel.id, None)  # End the game after one guess
 
-            if guessed_track == track_name and guessed_artist in artist_names:
-                if voice_client and voice_client.is_connected():
-                    await voice_client.disconnect()
-                user_scores = load_user_scores()
-                if not user_id in user_scores.keys():
-                    user_scores[user_id] = {
-                        "username": username,
-                        "pp": 0,
-                        "uses": 0,
-                    }
-                user_scores[user_id]['pp'] += points_awarded
-                save_user_scores(user_scores)
-                await message.channel.send(f"{message.author.display_name} got the correct answer `{track_name} / {', '.join(artist_names)}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
-            else:
-                if voice_client and voice_client.is_connected():
-                    await voice_client.disconnect()
-                correct_artist = artist_names[0]
-                await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {', '.join(artist_names)}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
+        #     if guessed_track == track_name and guessed_artist in artist_names:
+        #         if voice_client and voice_client.is_connected():
+        #             await voice_client.disconnect()
+        #         user_scores = load_user_scores()
+        #         if not user_id in user_scores.keys():
+        #             user_scores[user_id] = {
+        #                 "username": username,
+        #                 "pp": 0,
+        #                 "uses": 0,
+        #             }
+        #         user_scores[user_id]['pp'] += points_awarded
+        #         save_user_scores(user_scores)
+        #         await message.channel.send(f"{message.author.display_name} got the correct answer `{track_name} / {', '.join(artist_names)}` in {int(time_taken)} seconds and {time_taken_ms} milliseconds ({points_awarded} coins). \nYou currently have **{user_scores[user_id]['pp']}** coins.")
+        #     else:
+        #         if voice_client and voice_client.is_connected():
+        #             await voice_client.disconnect()
+        #         correct_artist = artist_names[0]
+        #         await message.channel.send(f"Incorrect guess! The correct answer was `{track_name} / {', '.join(artist_names)}`. You took {int(time_taken)} seconds and {time_taken_ms} milliseconds.")
 
         # Handling for the album guessing game
-        elif game_type == 'guess':
+        if game_type == 'guess':
             guess = message.content.lower().strip()
 
             album_name, artist_names = game_data['album_name'], game_data['artist_names']
