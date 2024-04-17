@@ -31,14 +31,15 @@ The bot supports several commands to make music interaction fun and easy:
 
 ## Setup and Installation
 
-As of now, Spotify Chef Bot runs locally and is not hosted on a server. Plans to deploy it on a server for permanent, continuous running are underway.
+As of now, Spotify Chef Bot runs locally and is not hosted on a server. Plans to deploy it on a server for permanent, continuous running are underway (looking for free options).
 
 To set up the bot locally:
 
 1. Clone the repository to your local machine.
-2. Ensure you have Python installed, along with `discord.py`,`spotipy`, and other dependencies *(Lines 1-4 in chef.py)*.
-3. Set up your `.env` file with the necessary API keys and tokens from Discord and Spotify.
-4. Run the bot using `python bot.py` from your command line.
+2. Ensure you have Python installed.
+3. Install all dependencies and packages by typing `pip install -r requirements.txt` in your command line.
+4. Set up your `.env` file with the necessary API keys and tokens from Discord and Spotify.
+5. Run the bot using `python bot.py` from your command line.
 
 ## Version/Release History
 
