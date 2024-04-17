@@ -1,0 +1,5 @@
+discord.py
+discord-ext-bot
+python-dotenv
+spotipy
+lyricsgenius
