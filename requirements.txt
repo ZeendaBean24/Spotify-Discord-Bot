@@ -3,3 +3,5 @@ discord-ext-bot
 python-dotenv
 spotipy
 lyricsgenius
+ffmpeg
+PyNaCl
